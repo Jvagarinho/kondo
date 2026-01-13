@@ -16,7 +16,7 @@ const Documents = () => {
     const fetchDocuments = async () => {
         setLoading(true);
         const { data, error } = await supabase
-            .from('documents')
+            .from('kondo_documents')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) console.error('Error fetching documents:', error);
@@ -34,7 +34,7 @@ const Documents = () => {
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-            .from('documents')
+            .from('kondo_documents')
             .upload(filePath, file);
 
         if (uploadError) {
@@ -44,7 +44,7 @@ const Documents = () => {
         }
 
         const { error: dbError } = await supabase
-            .from('documents')
+            .from('kondo_documents')
             .insert([{
                 name: file.name,
                 file_path: filePath,
@@ -63,13 +63,13 @@ const Documents = () => {
         if (!window.confirm('Delete this document?')) return;
 
         const { error: storageError } = await supabase.storage
-            .from('documents')
+            .from('kondo_documents')
             .remove([filePath]);
 
         if (storageError) console.error('Error removing from storage:', storageError);
 
         const { error: dbError } = await supabase
-            .from('documents')
+            .from('kondo_documents')
             .delete()
             .eq('id', id);
 
@@ -79,7 +79,7 @@ const Documents = () => {
 
     const handleDownloadDocument = async (filePath) => {
         const { data, error } = await supabase.storage
-            .from('documents')
+            .from('kondo_documents')
             .createSignedUrl(filePath, 60);
 
         if (error) alert('Error getting download link: ' + error.message);

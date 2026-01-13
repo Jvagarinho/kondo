@@ -32,7 +32,7 @@ const Payments = () => {
 
     const fetchPayments = async () => {
         const { data, error } = await supabase
-            .from('payments')
+            .from('kondo_payments')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) console.error('Error fetching payments:', error);
@@ -41,7 +41,7 @@ const Payments = () => {
 
     const fetchUsers = async () => {
         const { data, error } = await supabase
-            .from('users')
+            .from('kondo_users')
             .select('id, name')
             .order('name');
         if (error) console.error('Error fetching users:', error);
@@ -52,7 +52,7 @@ const Payments = () => {
         e.preventDefault();
         const selectedUser = users.find(u => u.id === newPayment.owner_id);
         const { error } = await supabase
-            .from('payments')
+            .from('kondo_payments')
             .insert([{
                 ...newPayment,
                 owner_name: selectedUser?.name || 'Unknown',
@@ -76,7 +76,7 @@ const Payments = () => {
     const handleTogglePaymentStatus = async (id, currentStatus) => {
         const newStatus = currentStatus === 'Paid' ? 'Pending' : 'Paid';
         const { error } = await supabase
-            .from('payments')
+            .from('kondo_payments')
             .update({ status: newStatus })
             .eq('id', id);
 
@@ -86,7 +86,7 @@ const Payments = () => {
 
     const handleDeletePayment = async (id) => {
         if (!window.confirm('Are you sure?')) return;
-        const { error } = await supabase.from('payments').delete().eq('id', id);
+        const { error } = await supabase.from('kondo_payments').delete().eq('id', id);
         if (error) alert('Error deleting payment: ' + error.message);
         else fetchPayments();
     };

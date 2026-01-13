@@ -60,7 +60,7 @@ export function AuthProvider({ children }) {
             if (user) {
                 try {
                     const { data, error } = await supabase
-                        .from('users')
+                        .from('kondo_users')
                         .select('role')
                         .eq('id', user.id)
                         .single();

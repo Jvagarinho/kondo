@@ -17,7 +17,7 @@ const Notices = () => {
     const fetchNotices = async () => {
         setLoading(true);
         const { data, error } = await supabase
-            .from('notices')
+            .from('kondo_notices')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) console.error('Error fetching notices:', error);
@@ -28,7 +28,7 @@ const Notices = () => {
     const handleAddNotice = async (e) => {
         e.preventDefault();
         const { error } = await supabase
-            .from('notices')
+            .from('kondo_notices')
             .insert([{ ...newNotice, author_id: currentUser.id }]);
 
         if (error) alert('Error adding notice: ' + error.message);
@@ -41,7 +41,7 @@ const Notices = () => {
 
     const handleDeleteNotice = async (id) => {
         if (!window.confirm('Are you sure you want to delete this notice?')) return;
-        const { error } = await supabase.from('notices').delete().eq('id', id);
+        const { error } = await supabase.from('kondo_notices').delete().eq('id', id);
         if (error) alert('Error deleting notice: ' + error.message);
         else fetchNotices();
     };

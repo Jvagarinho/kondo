@@ -40,7 +40,7 @@ const Dashboard = () => {
 
     const fetchNotices = async () => {
         const { data, error } = await supabase
-            .from('notices')
+            .from('kondo_notices')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) console.error('Error fetching notices:', error);
@@ -49,7 +49,7 @@ const Dashboard = () => {
 
     const fetchPayments = async () => {
         const { data, error } = await supabase
-            .from('payments')
+            .from('kondo_payments')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) console.error('Error fetching payments:', error);
@@ -58,7 +58,7 @@ const Dashboard = () => {
 
     const fetchDocuments = async () => {
         const { data, error } = await supabase
-            .from('documents')
+            .from('kondo_documents')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) console.error('Error fetching documents:', error);
@@ -67,7 +67,7 @@ const Dashboard = () => {
 
     const fetchUsers = async () => {
         const { data, error } = await supabase
-            .from('users')
+            .from('kondo_users')
             .select('id, name')
             .order('name');
         if (error) console.error('Error fetching users:', error);
@@ -77,7 +77,7 @@ const Dashboard = () => {
     const handleAddNotice = async (e) => {
         e.preventDefault();
         const { error } = await supabase
-            .from('notices')
+            .from('kondo_notices')
             .insert([{ ...newNotice, author_id: currentUser.id }]);
 
         if (error) alert('Error adding notice: ' + error.message);
@@ -90,7 +90,7 @@ const Dashboard = () => {
 
     const handleDeleteNotice = async (id) => {
         if (!window.confirm('Are you sure you want to delete this notice?')) return;
-        const { error } = await supabase.from('notices').delete().eq('id', id);
+        const { error } = await supabase.from('kondo_notices').delete().eq('id', id);
         if (error) alert('Error deleting notice: ' + error.message);
         else fetchNotices();
     };
@@ -99,7 +99,7 @@ const Dashboard = () => {
         e.preventDefault();
         const selectedUser = users.find(u => u.id === newPayment.owner_id);
         const { error } = await supabase
-            .from('payments')
+            .from('kondo_payments')
             .insert([{
                 ...newPayment,
                 owner_name: selectedUser?.name || 'Unknown',
@@ -123,7 +123,7 @@ const Dashboard = () => {
     const handleTogglePaymentStatus = async (id, currentStatus) => {
         const newStatus = currentStatus === 'Paid' ? 'Pending' : 'Paid';
         const { error } = await supabase
-            .from('payments')
+            .from('kondo_payments')
             .update({ status: newStatus })
             .eq('id', id);
 
@@ -133,7 +133,7 @@ const Dashboard = () => {
 
     const handleDeletePayment = async (id) => {
         if (!window.confirm('Are you sure?')) return;
-        const { error } = await supabase.from('payments').delete().eq('id', id);
+        const { error } = await supabase.from('kondo_payments').delete().eq('id', id);
         if (error) alert('Error deleting payment: ' + error.message);
         else fetchPayments();
     };
@@ -148,7 +148,7 @@ const Dashboard = () => {
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-            .from('documents')
+            .from('kondo_documents')
             .upload(filePath, file);
 
         if (uploadError) {
@@ -158,7 +158,7 @@ const Dashboard = () => {
         }
 
         const { error: dbError } = await supabase
-            .from('documents')
+            .from('kondo_documents')
             .insert([{
                 name: file.name,
                 file_path: filePath,
@@ -177,13 +177,13 @@ const Dashboard = () => {
         if (!window.confirm('Delete this document?')) return;
 
         const { error: storageError } = await supabase.storage
-            .from('documents')
+            .from('kondo_documents')
             .remove([filePath]);
 
         if (storageError) console.error('Error removing from storage:', storageError);
 
         const { error: dbError } = await supabase
-            .from('documents')
+            .from('kondo_documents')
             .delete()
             .eq('id', id);
 
@@ -193,7 +193,7 @@ const Dashboard = () => {
 
     const handleDownloadDocument = async (filePath) => {
         const { data, error } = await supabase.storage
-            .from('documents')
+            .from('kondo_documents')
             .createSignedUrl(filePath, 60);
 
         if (error) {
