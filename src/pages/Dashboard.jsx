@@ -231,6 +231,20 @@ const Dashboard = () => {
                 gap: '2rem',
                 marginTop: '2rem'
             }}>
+                {/* Temporary Debug Status */}
+                <div style={{
+                    gridColumn: '1 / -1',
+                    padding: '1rem',
+                    background: '#fff7ed',
+                    border: '1px solid #ffedd5',
+                    borderRadius: '12px',
+                    marginBottom: '1rem',
+                    fontSize: '0.85rem',
+                    color: '#9a3412',
+                    textAlign: 'center'
+                }}>
+                    <strong>Debug Info:</strong> User ID: {currentUser?.id} | Admin State: {isAdmin ? '✅ YES' : '❌ NO'} | Email: {currentUser?.email}
+                </div>
 
                 <Card
                     title="Recent Notices"
