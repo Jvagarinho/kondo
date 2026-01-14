@@ -244,6 +244,7 @@ const Dashboard = () => {
                     textAlign: 'center'
                 }}>
                     <strong>Debug Info:</strong> User ID: {currentUser?.id} | Admin State: {isAdmin ? '✅ YES' : '❌ NO'} | Email: {currentUser?.email}
+                    {window.__lastAuthError && <div style={{ color: 'red', marginTop: '0.5rem' }}>Error: {window.__lastAuthError}</div>}
                 </div>
 
                 <Card
