@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS public.kondo_users (
 ALTER TABLE public.kondo_users ENABLE ROW LEVEL SECURITY;
 
 -- Policies for Kondo Users
+DROP POLICY IF EXISTS "Allow individual read access" ON public.kondo_users;
 CREATE POLICY "Allow individual read access" ON public.kondo_users FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Allow admin read all" ON public.kondo_users;
 CREATE POLICY "Allow admin read all" ON public.kondo_users FOR SELECT USING (
     EXISTS (SELECT 1 FROM public.kondo_users WHERE id = auth.uid() AND role = 'admin')
 );
@@ -31,7 +33,9 @@ CREATE TABLE IF NOT EXISTS public.kondo_notices (
 ALTER TABLE public.kondo_notices ENABLE ROW LEVEL SECURITY;
 
 -- Policies for Notices
+DROP POLICY IF EXISTS "Allow public read notices" ON public.kondo_notices;
 CREATE POLICY "Allow public read notices" ON public.kondo_notices FOR SELECT USING (TRUE);
+DROP POLICY IF EXISTS "Allow admin manage notices" ON public.kondo_notices;
 CREATE POLICY "Allow admin manage notices" ON public.kondo_notices FOR ALL USING (
     EXISTS (SELECT 1 FROM public.kondo_users WHERE id = auth.uid() AND role = 'admin')
 );
@@ -52,7 +56,9 @@ CREATE TABLE IF NOT EXISTS public.kondo_payments (
 ALTER TABLE public.kondo_payments ENABLE ROW LEVEL SECURITY;
 
 -- Policies for Payments
+DROP POLICY IF EXISTS "Allow users to view own payments" ON public.kondo_payments;
 CREATE POLICY "Allow users to view own payments" ON public.kondo_payments FOR SELECT USING (auth.uid() = owner_id);
+DROP POLICY IF EXISTS "Allow admin manage payments" ON public.kondo_payments;
 CREATE POLICY "Allow admin manage payments" ON public.kondo_payments FOR ALL USING (
     EXISTS (SELECT 1 FROM public.kondo_users WHERE id = auth.uid() AND role = 'admin')
 );
@@ -70,7 +76,9 @@ CREATE TABLE IF NOT EXISTS public.kondo_documents (
 ALTER TABLE public.kondo_documents ENABLE ROW LEVEL SECURITY;
 
 -- Policies for Documents
+DROP POLICY IF EXISTS "Allow logged in users to view documents" ON public.kondo_documents;
 CREATE POLICY "Allow logged in users to view documents" ON public.kondo_documents FOR SELECT USING (auth.role() = 'authenticated');
+DROP POLICY IF EXISTS "Allow admin manage documents" ON public.kondo_documents;
 CREATE POLICY "Allow admin manage documents" ON public.kondo_documents FOR ALL USING (
     EXISTS (SELECT 1 FROM public.kondo_users WHERE id = auth.uid() AND role = 'admin')
 );
@@ -78,9 +86,19 @@ CREATE POLICY "Allow admin manage documents" ON public.kondo_documents FOR ALL U
 -- 5. Trigger for New User Creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    user_count INTEGER;
 BEGIN
-    INSERT INTO public.kondo_users (id, name, role)
-    VALUES (NEW.id, NEW.raw_user_meta_data->>'full_name', 'user');
+    SELECT count(*) INTO user_count FROM public.kondo_users;
+    
+    IF user_count = 0 THEN
+        INSERT INTO public.kondo_users (id, name, role)
+        VALUES (NEW.id, NEW.raw_user_meta_data->>'full_name', 'admin');
+    ELSE
+        INSERT INTO public.kondo_users (id, name, role)
+        VALUES (NEW.id, NEW.raw_user_meta_data->>'full_name', 'user');
+    END IF;
+    
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
