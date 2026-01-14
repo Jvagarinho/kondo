@@ -59,6 +59,12 @@ export function AuthProvider({ children }) {
             setCurrentUser(user);
             if (user) {
                 try {
+                    const { data, error } = await supabase
+                        .from('kondo_users')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
+
                     if (error) {
                         setIsAdmin(false);
                     } else if (!data) {
