@@ -59,26 +59,11 @@ export function AuthProvider({ children }) {
             setCurrentUser(user);
             if (user) {
                 try {
-                    console.log("Fetching role for user ID:", user.id);
-                    const { data, error } = await supabase
-                        .from('kondo_users')
-                        .select('role')
-                        .eq('id', user.id)
-                        .single();
-
-                    console.log("Full query result for user ID:", user.id, "Data:", data, "Error:", error);
-
                     if (error) {
-                        console.error("Error fetching user role:", error.message, "Details:", error.details, "Code:", error.code);
-                        window.__lastAuthError = error.message;
                         setIsAdmin(false);
                     } else if (!data) {
-                        console.warn("No entry found in kondo_users for this user. This might mean the trigger didn't run or the entry was deleted.");
-                        window.__lastAuthError = "No record in kondo_users table";
                         setIsAdmin(false);
                     } else {
-                        console.log("Found role:", data.role);
-                        window.__lastAuthError = null;
                         setIsAdmin(data.role === 'admin');
                     }
                 } catch (e) {

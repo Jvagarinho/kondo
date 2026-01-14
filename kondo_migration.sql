@@ -13,11 +13,8 @@ ALTER TABLE public.kondo_users ENABLE ROW LEVEL SECURITY;
 
 -- Policies for Kondo Users
 DROP POLICY IF EXISTS "Allow individual read access" ON public.kondo_users;
-CREATE POLICY "Allow individual read access" ON public.kondo_users FOR SELECT USING (auth.uid() = id);
 DROP POLICY IF EXISTS "Allow admin read all" ON public.kondo_users;
-CREATE POLICY "Allow admin read all" ON public.kondo_users FOR SELECT USING (
-    EXISTS (SELECT 1 FROM public.kondo_users WHERE id = auth.uid() AND role = 'admin')
-);
+CREATE POLICY "Allow authenticated read all" ON public.kondo_users FOR SELECT USING (auth.role() = 'authenticated');
 
 -- 2. Create Notices Table
 CREATE TABLE IF NOT EXISTS public.kondo_notices (
