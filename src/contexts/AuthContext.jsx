@@ -10,6 +10,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
     const [currentUser, setCurrentUser] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [condominiumId, setCondominiumId] = useState(null);
     const [loading, setLoading] = useState(true);
 
     async function signUp(email, password, name) {
@@ -61,23 +62,28 @@ export function AuthProvider({ children }) {
                 try {
                     const { data, error } = await supabase
                         .from('kondo_users')
-                        .select('role')
+                        .select('role, condominium_id')
                         .eq('id', user.id)
                         .single();
 
                     if (error) {
                         setIsAdmin(false);
+                        setCondominiumId(null);
                     } else if (!data) {
                         setIsAdmin(false);
+                        setCondominiumId(null);
                     } else {
                         setIsAdmin(data.role === 'admin');
+                        setCondominiumId(data.condominium_id || null);
                     }
                 } catch (e) {
                     console.error("Error fetching user role", e);
                     setIsAdmin(false);
+                    setCondominiumId(null);
                 }
             } else {
                 setIsAdmin(false);
+                setCondominiumId(null);
             }
             setLoading(false);
         }
@@ -88,6 +94,7 @@ export function AuthProvider({ children }) {
     const value = {
         currentUser,
         isAdmin,
+        condominiumId,
         signUp,
         login,
         logout

@@ -1,35 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Notices = () => {
-    const { currentUser, isAdmin } = useAuth();
+    const { currentUser, isAdmin, condominiumId } = useAuth();
+    const { t } = useLanguage();
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showNoticeModal, setShowNoticeModal] = useState(false);
     const [newNotice, setNewNotice] = useState({ title: '', content: '', urgent: false });
 
-    useEffect(() => {
-        fetchNotices();
-    }, []);
-
-    const fetchNotices = async () => {
+    const fetchNotices = useCallback(async () => {
         setLoading(true);
-        const { data, error } = await supabase
+        let query = supabase
             .from('kondo_notices')
             .select('*')
             .order('created_at', { ascending: false });
+        if (condominiumId) {
+            query = query.eq('condominium_id', condominiumId);
+        }
+        const { data, error } = await query;
         if (error) console.error('Error fetching notices:', error);
         else setNotices(data);
         setLoading(false);
-    };
+    }, [condominiumId]);
+
+    useEffect(() => {
+        fetchNotices();
+    }, [fetchNotices]);
 
     const handleAddNotice = async (e) => {
         e.preventDefault();
+        const payload = {
+            ...newNotice,
+            author_id: currentUser.id
+        };
+        if (condominiumId) {
+            payload.condominium_id = condominiumId;
+        }
         const { error } = await supabase
             .from('kondo_notices')
-            .insert([{ ...newNotice, author_id: currentUser.id }]);
+            .insert([payload]);
 
         if (error) alert('Error adding notice: ' + error.message);
         else {
@@ -50,31 +63,27 @@ const Notices = () => {
         <div className="app-container" style={{ paddingBottom: '4rem' }}>
             <Navbar />
 
-            <main style={{ padding: '0 2rem', maxWidth: '800px', margin: '2rem auto' }}>
+            <main className="page-main-content" style={{ maxWidth: '800px' }}>
                 <div className="premium-card fade-in">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: '700' }}>Notices & Alerts</h2>
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '700' }}>{t('notices.title')}</h2>
                         {isAdmin && (
                             <button onClick={() => setShowNoticeModal(true)} className="btn-primary">
-                                + New Alert
+                                {t('notices.newAlertButton')}
                             </button>
                         )}
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div className="notices-list">
                         {loading ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>Loading notices...</p>
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('notices.loading')}</p>
                         ) : notices.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>No notices found.</p>
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('notices.empty')}</p>
                         ) : (
                             notices.map(notice => (
-                                <div key={notice.id} style={{
-                                    padding: '1.5rem',
-                                    borderRadius: '16px',
+                                <div key={notice.id} className="notice-item" style={{
                                     background: notice.urgent ? 'var(--urgent-bg)' : 'var(--highlight-blue)',
                                     borderLeft: notice.urgent ? `6px solid var(--urgent-border)` : `6px solid var(--accent-color)`,
-                                    boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-                                    position: 'relative'
                                 }}>
                                     {isAdmin && (
                                         <button
@@ -119,25 +128,25 @@ const Notices = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
                 }}>
                     <div className="premium-card" style={{ width: '450px', margin: '1rem' }}>
-                        <h3 style={{ marginBottom: '1.5rem' }}>Post New Alert</h3>
+                        <h3 style={{ marginBottom: '1.5rem' }}>{t('notices.modal.title')}</h3>
                         <form onSubmit={handleAddNotice} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>Title</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t('notices.modal.titleLabel')}</label>
                                 <input required className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '10px' }}
                                     value={newNotice.title} onChange={e => setNewNotice({ ...newNotice, title: e.target.value })} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>Content</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t('notices.modal.contentLabel')}</label>
                                 <textarea required rows="5" className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', resize: 'none' }}
                                     value={newNotice.content} onChange={e => setNewNotice({ ...newNotice, content: e.target.value })} />
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                 <input type="checkbox" id="urgent" checked={newNotice.urgent} onChange={e => setNewNotice({ ...newNotice, urgent: e.target.checked })} />
-                                <label htmlFor="urgent" style={{ fontSize: '0.95rem', cursor: 'pointer' }}>Mark as Urgent</label>
+                                <label htmlFor="urgent" style={{ fontSize: '0.95rem', cursor: 'pointer' }}>{t('notices.modal.markUrgent')}</label>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                <button type="button" onClick={() => setShowNoticeModal(false)} className="nav-link" style={{ flex: 1 }}>Cancel</button>
-                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>Post Notice</button>
+                                <button type="button" onClick={() => setShowNoticeModal(false)} className="nav-link" style={{ flex: 1 }}>{t('common.cancel')}</button>
+                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>{t('notices.modal.submit')}</button>
                             </div>
                         </form>
                     </div>

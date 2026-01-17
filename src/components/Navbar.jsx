@@ -1,18 +1,26 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Navbar = () => {
-    const { currentUser, logout } = useAuth();
+    const { currentUser, logout, isAdmin } = useAuth();
+    const { t, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
 
     const links = [
-        { to: '/', label: 'Dashboard' },
-        { to: '/notices', label: 'Notices' },
-        { to: '/payments', label: 'Payments' },
-        { to: '/documents', label: 'Documents' }
+        { to: '/', labelKey: 'nav.dashboard' },
+        { to: '/profile', labelKey: 'nav.profile' },
+        { to: '/notices', labelKey: 'nav.notices' },
+        { to: '/payments', labelKey: 'nav.payments' },
+        { to: '/documents', labelKey: 'nav.documents' },
+        { to: '/condominium', labelKey: 'nav.condominium' }
     ];
+
+    if (isAdmin) {
+        links.push({ to: '/users', labelKey: 'nav.users' });
+    }
 
     const handleLogout = async () => {
         try {
@@ -24,33 +32,32 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="glass" style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '1rem 2rem',
-            margin: '1rem',
-            position: 'sticky',
-            top: 0,
-            zIndex: 1000
-        }}>
-            <Link to="/" style={{ textDecoration: 'none' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--accent-color)' }}>
+        <nav className="glass navbar">
+            <Link to="/" className="navbar-brand-link">
+                <div className="navbar-brand">
                     KONDO
                 </div>
             </Link>
-            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+            <div className="navbar-right">
                 {links.map(link => (
                     <Link
                         key={link.to}
                         to={link.to}
                         className={`nav-link${location.pathname === link.to ? ' nav-link-active' : ''}`}
                     >
-                        {link.label}
+                        {t(link.labelKey)}
                     </Link>
                 ))}
+                <button
+                    type="button"
+                    onClick={toggleLanguage}
+                    className="nav-link"
+                    style={{ paddingInline: '0.75rem' }}
+                >
+                    {t('nav.languageToggle')}
+                </button>
                 <button onClick={handleLogout} className="btn-logout">
-                    Sign Out
+                    {t('nav.signOut')}
                 </button>
                 <div style={{
                     width: '40px',

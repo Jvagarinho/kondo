@@ -6,6 +6,9 @@ import Dashboard from './pages/Dashboard';
 import Notices from './pages/Notices';
 import Documents from './pages/Documents';
 import Payments from './pages/Payments';
+import Profile from './pages/Profile';
+import Condominium from './pages/Condominium';
+import Users from './pages/Users';
 import { useAuth } from './contexts/AuthContext';
 
 const PrivateRoute = ({ children }) => {
@@ -48,6 +51,30 @@ function App() {
           element={
             <PrivateRoute>
               <Payments />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/condominium"
+          element={
+            <PrivateRoute>
+              <Condominium />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <PrivateRoute>
+              <Users />
             </PrivateRoute>
           }
         />

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Payments = () => {
-    const { isAdmin } = useAuth();
+    const { isAdmin, condominiumId } = useAuth();
+    const { t } = useLanguage();
     const [payments, setPayments] = useState([]);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,47 +19,59 @@ const Payments = () => {
         month: new Date().toISOString().slice(0, 7)
     });
 
-    useEffect(() => {
-        fetchData();
-    }, [isAdmin]);
+    const fetchPayments = useCallback(async () => {
+        let query = supabase
+            .from('kondo_payments')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (condominiumId) {
+            query = query.eq('condominium_id', condominiumId);
+        }
+        const { data, error } = await query;
+        if (error) console.error('Error fetching payments:', error);
+        else setPayments(data);
+    }, [condominiumId]);
 
-    const fetchData = async () => {
+    const fetchUsers = useCallback(async () => {
+        let query = supabase
+            .from('kondo_users')
+            .select('id, name')
+            .order('name');
+        if (condominiumId) {
+            query = query.eq('condominium_id', condominiumId);
+        }
+        const { data, error } = await query;
+        if (error) console.error('Error fetching users:', error);
+        else setUsers(data);
+    }, [condominiumId]);
+
+    const fetchData = useCallback(async () => {
         setLoading(true);
         await Promise.all([
             fetchPayments(),
             isAdmin ? fetchUsers() : Promise.resolve()
         ]);
         setLoading(false);
-    };
+    }, [isAdmin, fetchPayments, fetchUsers]);
 
-    const fetchPayments = async () => {
-        const { data, error } = await supabase
-            .from('kondo_payments')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (error) console.error('Error fetching payments:', error);
-        else setPayments(data);
-    };
-
-    const fetchUsers = async () => {
-        const { data, error } = await supabase
-            .from('kondo_users')
-            .select('id, name')
-            .order('name');
-        if (error) console.error('Error fetching users:', error);
-        else setUsers(data);
-    };
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleAddPayment = async (e) => {
         e.preventDefault();
         const selectedUser = users.find(u => u.id === newPayment.owner_id);
+        const payload = {
+            ...newPayment,
+            owner_name: selectedUser?.name || 'Unknown',
+            amount: parseFloat(newPayment.amount)
+        };
+        if (condominiumId) {
+            payload.condominium_id = condominiumId;
+        }
         const { error } = await supabase
             .from('kondo_payments')
-            .insert([{
-                ...newPayment,
-                owner_name: selectedUser?.name || 'Unknown',
-                amount: parseFloat(newPayment.amount)
-            }]);
+            .insert([payload]);
 
         if (error) alert('Error adding payment: ' + error.message);
         else {
@@ -95,10 +109,10 @@ const Payments = () => {
         <div className="app-container" style={{ paddingBottom: '4rem' }}>
             <Navbar />
 
-            <main style={{ padding: '0 2rem', maxWidth: '1000px', margin: '2rem auto' }}>
+            <main className="page-main-content" style={{ maxWidth: '1000px' }}>
                 <div className="premium-card fade-in">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ fontSize: '1.75rem', fontWeight: '700' }}>Payment Control</h2>
+                        <h2 style={{ fontSize: '1.75rem', fontWeight: '700' }}>{t('payments.title')}</h2>
                         {isAdmin && (
                             <button onClick={() => setShowPaymentModal(true)} className="btn-primary">
                                 + Add Record
@@ -110,19 +124,19 @@ const Payments = () => {
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                    <th style={{ padding: '1.25rem 1rem' }}>Owner</th>
-                                    <th style={{ padding: '1.25rem 1rem' }}>Unit</th>
-                                    <th style={{ padding: '1.25rem 1rem' }}>Month</th>
-                                    <th style={{ padding: '1.25rem 1rem' }}>Amount</th>
-                                    <th style={{ padding: '1.25rem 1rem' }}>Status</th>
-                                    {isAdmin && <th style={{ padding: '1.25rem 1rem' }}>Actions</th>}
+                                    <th style={{ padding: '1.25rem 1rem' }}>{t('payments.table.owner')}</th>
+                                    <th style={{ padding: '1.25rem 1rem' }}>{t('payments.table.unit')}</th>
+                                    <th style={{ padding: '1.25rem 1rem' }}>{t('payments.table.month')}</th>
+                                    <th style={{ padding: '1.25rem 1rem' }}>{t('payments.table.amount')}</th>
+                                    <th style={{ padding: '1.25rem 1rem' }}>{t('payments.table.status')}</th>
+                                    {isAdmin && <th style={{ padding: '1.25rem 1rem' }}>{t('payments.table.actions')}</th>}
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '2rem' }}>Loading payments...</td></tr>
+                                    <tr><td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '2rem' }}>{t('payments.loading')}</td></tr>
                                 ) : payments.length === 0 ? (
-                                    <tr><td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '2rem' }}>No payment records found.</td></tr>
+                                    <tr><td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '2rem' }}>{t('payments.empty')}</td></tr>
                                 ) : (
                                     payments.map((p) => (
                                         <tr key={p.id} style={{ borderBottom: '1px solid var(--glass-border)', fontSize: '1rem', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--highlight-blue)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
@@ -177,10 +191,10 @@ const Payments = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
                 }}>
                     <div className="premium-card" style={{ width: '450px', margin: '1rem' }}>
-                        <h3 style={{ marginBottom: '1.5rem' }}>Create Payment Record</h3>
+                        <h3 style={{ marginBottom: '1.5rem' }}>{t('payments.modal.title')}</h3>
                         <form onSubmit={handleAddPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>Owner</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t('payments.modal.ownerLabel')}</label>
                                 <select
                                     required
                                     className="glass"
@@ -193,23 +207,23 @@ const Payments = () => {
                                 </select>
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>Unit</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t('payments.modal.unitLabel')}</label>
                                 <input required className="glass" style={{ width: '100%', padding: '0.8rem', outline: 'none', borderRadius: '10px' }}
                                     value={newPayment.unit} onChange={e => setNewPayment({ ...newPayment, unit: e.target.value })} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>Reference Month</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t('payments.modal.monthLabel')}</label>
                                 <input type="month" required className="glass" style={{ width: '100%', padding: '0.8rem', outline: 'none', borderRadius: '10px' }}
                                     value={newPayment.month} onChange={e => setNewPayment({ ...newPayment, month: e.target.value })} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>Amount ($)</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t('payments.modal.amountLabel')}</label>
                                 <input type="number" step="0.01" required className="glass" style={{ width: '100%', padding: '0.8rem', outline: 'none', borderRadius: '10px' }}
                                     value={newPayment.amount} onChange={e => setNewPayment({ ...newPayment, amount: e.target.value })} />
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                <button type="button" onClick={() => setShowPaymentModal(false)} className="nav-link" style={{ flex: 1 }}>Cancel</button>
-                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>Create Record</button>
+                                <button type="button" onClick={() => setShowPaymentModal(false)} className="nav-link" style={{ flex: 1 }}>{t('common.cancel')}</button>
+                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>{t('payments.modal.submit')}</button>
                             </div>
                         </form>
                     </div>

@@ -1,11 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
+import { useLanguage } from '../contexts/LanguageContext';
+
+const Card = ({ title, children, action, viewAllLink }) => (
+    <div className="premium-card fade-in">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{title}</h3>
+                {viewAllLink && (
+                    <Link to={viewAllLink} style={{ fontSize: '0.8rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                        View All &rarr;
+                    </Link>
+                )}
+            </div>
+            {action}
+        </div>
+        <div>{children}</div>
+    </div>
+);
 
 const Dashboard = () => {
-    const { currentUser, isAdmin } = useAuth();
+    const { currentUser, isAdmin, condominiumId } = useAuth();
+    const { t } = useLanguage();
     const [notices, setNotices] = useState([]);
     const [payments, setPayments] = useState([]);
     const [documents, setDocuments] = useState([]);
@@ -23,11 +42,59 @@ const Dashboard = () => {
         month: new Date().toISOString().slice(0, 7) // Default to current month YYYY-MM
     });
 
-    useEffect(() => {
-        fetchData();
-    }, [isAdmin]);
+    const fetchNotices = useCallback(async () => {
+        let query = supabase
+            .from('kondo_notices')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (condominiumId) {
+            query = query.eq('condominium_id', condominiumId);
+        }
+        const { data, error } = await query;
+        if (error) console.error('Error fetching notices:', error);
+        else setNotices(data);
+    }, [condominiumId]);
 
-    const fetchData = async () => {
+    const fetchPayments = useCallback(async () => {
+        let query = supabase
+            .from('kondo_payments')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (condominiumId) {
+            query = query.eq('condominium_id', condominiumId);
+        }
+        const { data, error } = await query;
+        if (error) console.error('Error fetching payments:', error);
+        else setPayments(data);
+    }, [condominiumId]);
+
+    const fetchDocuments = useCallback(async () => {
+        let query = supabase
+            .from('kondo_documents')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (condominiumId) {
+            query = query.eq('condominium_id', condominiumId);
+        }
+        const { data, error } = await query;
+        if (error) console.error('Error fetching documents:', error);
+        else setDocuments(data || []);
+    }, [condominiumId]);
+
+    const fetchUsers = useCallback(async () => {
+        let query = supabase
+            .from('kondo_users')
+            .select('id, name')
+            .order('name');
+        if (condominiumId) {
+            query = query.eq('condominium_id', condominiumId);
+        }
+        const { data, error } = await query;
+        if (error) console.error('Error fetching users:', error);
+        else setUsers(data);
+    }, [condominiumId]);
+
+    const fetchData = useCallback(async () => {
         setLoading(true);
         await Promise.all([
             fetchNotices(),
@@ -36,49 +103,24 @@ const Dashboard = () => {
             isAdmin ? fetchUsers() : Promise.resolve()
         ]);
         setLoading(false);
-    };
+    }, [fetchNotices, fetchPayments, fetchDocuments, fetchUsers, isAdmin]);
 
-    const fetchNotices = async () => {
-        const { data, error } = await supabase
-            .from('kondo_notices')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (error) console.error('Error fetching notices:', error);
-        else setNotices(data);
-    };
-
-    const fetchPayments = async () => {
-        const { data, error } = await supabase
-            .from('kondo_payments')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (error) console.error('Error fetching payments:', error);
-        else setPayments(data);
-    };
-
-    const fetchDocuments = async () => {
-        const { data, error } = await supabase
-            .from('kondo_documents')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (error) console.error('Error fetching documents:', error);
-        else setDocuments(data || []);
-    };
-
-    const fetchUsers = async () => {
-        const { data, error } = await supabase
-            .from('kondo_users')
-            .select('id, name')
-            .order('name');
-        if (error) console.error('Error fetching users:', error);
-        else setUsers(data);
-    };
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleAddNotice = async (e) => {
         e.preventDefault();
+        const payload = {
+            ...newNotice,
+            author_id: currentUser.id
+        };
+        if (condominiumId) {
+            payload.condominium_id = condominiumId;
+        }
         const { error } = await supabase
             .from('kondo_notices')
-            .insert([{ ...newNotice, author_id: currentUser.id }]);
+            .insert([payload]);
 
         if (error) alert('Error adding notice: ' + error.message);
         else {
@@ -98,13 +140,17 @@ const Dashboard = () => {
     const handleAddPayment = async (e) => {
         e.preventDefault();
         const selectedUser = users.find(u => u.id === newPayment.owner_id);
+        const payload = {
+            ...newPayment,
+            owner_name: selectedUser?.name || 'Unknown',
+            amount: parseFloat(newPayment.amount)
+        };
+        if (condominiumId) {
+            payload.condominium_id = condominiumId;
+        }
         const { error } = await supabase
             .from('kondo_payments')
-            .insert([{
-                ...newPayment,
-                owner_name: selectedUser?.name || 'Unknown',
-                amount: parseFloat(newPayment.amount)
-            }]);
+            .insert([payload]);
 
         if (error) alert('Error adding payment: ' + error.message);
         else {
@@ -144,7 +190,7 @@ const Dashboard = () => {
 
         setUploading(true);
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
+        const fileName = `${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -203,54 +249,39 @@ const Dashboard = () => {
         }
     };
 
-    const Card = ({ title, children, action, viewAllLink }) => (
-        <div className="premium-card fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{title}</h3>
-                    {viewAllLink && (
-                        <Link to={viewAllLink} style={{ fontSize: '0.8rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
-                            View All &rarr;
-                        </Link>
-                    )}
-                </div>
-                {action}
-            </div>
-            <div>{children}</div>
-        </div>
-    );
-
     return (
         <div className="app-container" style={{ paddingBottom: '4rem' }}>
             <Navbar />
 
-            <section style={{ padding: '0 2rem', marginTop: '1.5rem' }}>
+            <section className="dashboard-header">
                 <h1 style={{ fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
-                    Welcome back, {currentUser?.user_metadata?.name || currentUser?.email}
+                    {t('dashboard.welcome')}, {currentUser?.user_metadata?.name || currentUser?.email}
                 </h1>
                 <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
-                    Here is an overview of notices, payments, and documents for your building.
+                    {t('dashboard.subtitle')}
                 </p>
             </section>
 
-            <main style={{
-                padding: '0 2rem',
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-                gap: '2rem',
-                marginTop: '2rem'
-            }}>
+            <main className="dashboard-grid">
 
                 <Card
-                    title="Recent Notices"
+                    title={t('dashboard.recentNotices')}
                     viewAllLink="/notices"
-                    action={isAdmin && <button onClick={() => setShowNoticeModal(true)} className="btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}>+ New Alert</button>}
+                    action={isAdmin && (
+                        <button
+                            onClick={() => setShowNoticeModal(true)}
+                            className="btn-primary"
+                            style={{ padding: '0.4rem 1rem', fontSize: '0.85rem' }}
+                        >
+                            {t('dashboard.newAlertButton')}
+                        </button>
+                    )}
                 >
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                         {loading ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>Loading notices...</p>
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.loadingNotices')}</p>
                         ) : notices.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>No active notices.</p>
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.noNotices')}</p>
                         ) : (
                             notices.slice(0, 4).map(notice => (
                                 <div key={notice.id} style={{
@@ -295,23 +326,23 @@ const Dashboard = () => {
                     </div>
                 </Card>
 
-                <Card title="Payment Control" viewAllLink="/payments">
+                <Card title={t('dashboard.paymentControl')} viewAllLink="/payments">
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                                    <th style={{ padding: '1rem 0.5rem' }}>Owner</th>
-                                    <th style={{ padding: '1rem 0.5rem' }}>Unit</th>
-                                    <th style={{ padding: '1rem 0.5rem' }}>Month</th>
-                                    <th style={{ padding: '1rem 0.5rem' }}>Status</th>
-                                    {isAdmin && <th style={{ padding: '1rem 0.5rem' }}>Actions</th>}
+                                    <th style={{ padding: '1rem 0.5rem' }}>{t('dashboard.table.owner')}</th>
+                                    <th style={{ padding: '1rem 0.5rem' }}>{t('dashboard.table.unit')}</th>
+                                    <th style={{ padding: '1rem 0.5rem' }}>{t('dashboard.table.month')}</th>
+                                    <th style={{ padding: '1rem 0.5rem' }}>{t('dashboard.table.status')}</th>
+                                    {isAdmin && <th style={{ padding: '1rem 0.5rem' }}>{t('dashboard.table.actions')}</th>}
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>Loading payments...</td></tr>
+                                    <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>{t('dashboard.loadingPayments')}</td></tr>
                                 ) : payments.length === 0 ? (
-                                    <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>No payment records.</td></tr>
+                                    <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>{t('dashboard.noPayments')}</td></tr>
                                 ) : (
                                     payments.slice(0, 4).map((p) => (
                                         <tr key={p.id} style={{ borderBottom: '1px solid var(--glass-border)', fontSize: '0.9rem' }}>
@@ -356,13 +387,13 @@ const Dashboard = () => {
                     </div>
                     {isAdmin && (
                         <button onClick={() => setShowPaymentModal(true)} className="btn-primary" style={{ width: '100%', marginTop: '1rem', padding: '0.6rem' }}>
-                            + Add New Record
+                            {t('dashboard.addPaymentRecord')}
                         </button>
                     )}
                 </Card>
 
                 <Card
-                    title="Recent Documents"
+                    title={t('dashboard.recentDocuments')}
                     viewAllLink="/documents"
                     action={isAdmin && (
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -378,16 +409,16 @@ const Dashboard = () => {
                                 style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
                                 disabled={uploading}
                             >
-                                {uploading ? '...' : 'Upload'}
+                                {uploading ? '...' : t('dashboard.upload')}
                             </button>
                         </div>
                     )}
                 >
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                         {loading ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>Loading documents...</p>
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.loadingDocuments')}</p>
                         ) : documents.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>No documents available.</p>
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.noDocuments')}</p>
                         ) : (
                             documents.slice(0, 4).map((doc) => (
                                 <div key={doc.id} style={{
