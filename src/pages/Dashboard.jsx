@@ -5,22 +5,25 @@ import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
 
-const Card = ({ title, children, action, viewAllLink }) => (
-    <div className="premium-card fade-in">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{title}</h3>
-                {viewAllLink && (
-                    <Link to={viewAllLink} style={{ fontSize: '0.8rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
-                        View All &rarr;
-                    </Link>
-                )}
+const Card = ({ title, children, action, viewAllLink }) => {
+    const { t } = useLanguage();
+    return (
+        <div className="premium-card fade-in">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600' }}>{title}</h3>
+                    {viewAllLink && (
+                        <Link to={viewAllLink} style={{ fontSize: '0.8rem', color: 'var(--accent-color)', textDecoration: 'none', fontWeight: '600' }}>
+                            {t('dashboard.viewAll')} &rarr;
+                        </Link>
+                    )}
+                </div>
+                {action}
             </div>
-            {action}
+            <div>{children}</div>
         </div>
-        <div>{children}</div>
-    </div>
-);
+    );
+};
 
 const Dashboard = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
@@ -465,7 +468,6 @@ const Dashboard = () => {
                 </Card>
             </main>
 
-            {/* Notice Modal */}
             {showNoticeModal && (
                 <div className="modal-overlay" style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -473,32 +475,31 @@ const Dashboard = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
                 }}>
                     <div className="premium-card" style={{ width: '400px', margin: '1rem' }}>
-                        <h3 style={{ marginBottom: '1.5rem' }}>Post New Alert</h3>
+                        <h3 style={{ marginBottom: '1.5rem' }}>{t('dashboard.noticeModal.title')}</h3>
                         <form onSubmit={handleAddNotice} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>Title</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>{t('dashboard.noticeModal.titleLabel')}</label>
                                 <input required className="glass" style={{ width: '100%', padding: '0.8rem', outline: 'none', border: '1px solid var(--glass-border)', borderRadius: '8px' }}
                                     value={newNotice.title} onChange={e => setNewNotice({ ...newNotice, title: e.target.value })} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>Content</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>{t('dashboard.noticeModal.contentLabel')}</label>
                                 <textarea required rows="4" className="glass" style={{ width: '100%', padding: '0.8rem', outline: 'none', border: '1px solid var(--glass-border)', borderRadius: '8px', resize: 'none' }}
                                     value={newNotice.content} onChange={e => setNewNotice({ ...newNotice, content: e.target.value })} />
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <input type="checkbox" id="urgent" checked={newNotice.urgent} onChange={e => setNewNotice({ ...newNotice, urgent: e.target.checked })} />
-                                <label htmlFor="urgent" style={{ fontSize: '0.9rem' }}>Mark as Urgent</label>
+                                <label htmlFor="urgent" style={{ fontSize: '0.9rem' }}>{t('dashboard.noticeModal.markUrgent')}</label>
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                <button type="button" onClick={() => setShowNoticeModal(false)} className="nav-link" style={{ flex: 1 }}>Cancel</button>
-                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>Post Notice</button>
+                                <button type="button" onClick={() => setShowNoticeModal(false)} className="nav-link" style={{ flex: 1 }}>{t('common.cancel')}</button>
+                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>{t('dashboard.noticeModal.submit')}</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Payment Modal */}
             {showPaymentModal && (
                 <div className="modal-overlay" style={{
                     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -506,10 +507,10 @@ const Dashboard = () => {
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
                 }}>
                     <div className="premium-card" style={{ width: '400px', margin: '1rem' }}>
-                        <h3 style={{ marginBottom: '1.5rem' }}>Create Payment Record</h3>
+                        <h3 style={{ marginBottom: '1.5rem' }}>{t('dashboard.paymentModal.title')}</h3>
                         <form onSubmit={handleAddPayment} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>Owner</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>{t('dashboard.paymentModal.ownerLabel')}</label>
                                 <select
                                     required
                                     className="glass"
@@ -517,28 +518,28 @@ const Dashboard = () => {
                                     value={newPayment.owner_id}
                                     onChange={e => setNewPayment({ ...newPayment, owner_id: e.target.value })}
                                 >
-                                    <option value="">Select Owner</option>
+                                    <option value="">{t('payments.modal.ownerLabel')}</option>
                                     {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>Unit</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>{t('dashboard.paymentModal.unitLabel')}</label>
                                 <input required className="glass" style={{ width: '100%', padding: '0.8rem', outline: 'none', border: '1px solid var(--glass-border)', borderRadius: '8px' }}
                                     value={newPayment.unit} onChange={e => setNewPayment({ ...newPayment, unit: e.target.value })} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>Reference Month</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>{t('dashboard.paymentModal.monthLabel')}</label>
                                 <input type="month" required className="glass" style={{ width: '100%', padding: '0.8rem', outline: 'none', border: '1px solid var(--glass-border)', borderRadius: '8px' }}
                                     value={newPayment.month} onChange={e => setNewPayment({ ...newPayment, month: e.target.value })} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>Amount ($)</label>
+                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.4rem' }}>{t('dashboard.paymentModal.amountLabel')}</label>
                                 <input type="number" step="0.01" required className="glass" style={{ width: '100%', padding: '0.8rem', outline: 'none', border: '1px solid var(--glass-border)', borderRadius: '8px' }}
                                     value={newPayment.amount} onChange={e => setNewPayment({ ...newPayment, amount: e.target.value })} />
                             </div>
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                <button type="button" onClick={() => setShowPaymentModal(false)} className="nav-link" style={{ flex: 1 }}>Cancel</button>
-                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>Create Record</button>
+                                <button type="button" onClick={() => setShowPaymentModal(false)} className="nav-link" style={{ flex: 1 }}>{t('common.cancel')}</button>
+                                <button type="submit" className="btn-primary" style={{ flex: 1 }}>{t('dashboard.paymentModal.submit')}</button>
                             </div>
                         </form>
                     </div>
