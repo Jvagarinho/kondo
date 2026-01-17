@@ -190,7 +190,7 @@ const Profile = () => {
                                 </span>
                                 <input
                                     type="text"
-                                    value={condominiumName || 'Not assigned yet'}
+                                    value={condominiumName || t('profile.condominiumUnassigned')}
                                     readOnly
                                     className="input-field"
                                     style={{ marginTop: '0.35rem', opacity: 0.7 }}
