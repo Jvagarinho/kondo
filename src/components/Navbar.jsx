@@ -1,10 +1,18 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const links = [
+        { to: '/', label: 'Dashboard' },
+        { to: '/notices', label: 'Notices' },
+        { to: '/payments', label: 'Payments' },
+        { to: '/documents', label: 'Documents' }
+    ];
 
     const handleLogout = async () => {
         try {
@@ -32,10 +40,15 @@ const Navbar = () => {
                 </div>
             </Link>
             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-                <Link to="/" className="nav-link">Dashboard</Link>
-                <Link to="/notices" className="nav-link">Notices</Link>
-                <Link to="/payments" className="nav-link">Payments</Link>
-                <Link to="/documents" className="nav-link">Documents</Link>
+                {links.map(link => (
+                    <Link
+                        key={link.to}
+                        to={link.to}
+                        className={`nav-link${location.pathname === link.to ? ' nav-link-active' : ''}`}
+                    >
+                        {link.label}
+                    </Link>
+                ))}
                 <button onClick={handleLogout} style={{
                     background: 'none',
                     border: 'none',

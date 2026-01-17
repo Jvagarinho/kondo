@@ -224,6 +224,15 @@ const Dashboard = () => {
         <div className="app-container" style={{ paddingBottom: '4rem' }}>
             <Navbar />
 
+            <section style={{ padding: '0 2rem', marginTop: '1.5rem' }}>
+                <h1 style={{ fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+                    Welcome back, {currentUser?.user_metadata?.name || currentUser?.email}
+                </h1>
+                <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                    Here is an overview of notices, payments, and documents for your building.
+                </p>
+            </section>
+
             <main style={{
                 padding: '0 2rem',
                 display: 'grid',

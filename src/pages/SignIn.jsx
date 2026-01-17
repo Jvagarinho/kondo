@@ -24,14 +24,8 @@ const SignIn = () => {
     }
 
     return (
-        <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '100vh',
-            padding: '2rem'
-        }}>
-            <div className="premium-card fade-in" style={{ width: '100%', maxWidth: '400px' }}>
+        <div className="auth-layout">
+            <div className="premium-card fade-in auth-card">
                 <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.75rem', color: 'var(--accent-color)' }}>
                     Welcome Back
                 </h2>
@@ -43,14 +37,7 @@ const SignIn = () => {
                         <input
                             type="email"
                             required
-                            style={{
-                                width: '100%',
-                                padding: '0.8rem',
-                                borderRadius: '10px',
-                                border: '1px solid var(--glass-border)',
-                                outline: 'none',
-                                background: '#f8fafc'
-                            }}
+                            className="input-field"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -60,14 +47,7 @@ const SignIn = () => {
                         <input
                             type="password"
                             required
-                            style={{
-                                width: '100%',
-                                padding: '0.8rem',
-                                borderRadius: '10px',
-                                border: '1px solid var(--glass-border)',
-                                outline: 'none',
-                                background: '#f8fafc'
-                            }}
+                            className="input-field"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
