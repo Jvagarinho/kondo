@@ -49,14 +49,9 @@ const Navbar = () => {
                         {link.label}
                     </Link>
                 ))}
-                <button onClick={handleLogout} style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    fontSize: 'var(--font-main)',
-                    fontWeight: '500'
-                }}>Sign Out</button>
+                <button onClick={handleLogout} className="btn-logout">
+                    Sign Out
+                </button>
                 <div style={{
                     width: '40px',
                     height: '40px',
