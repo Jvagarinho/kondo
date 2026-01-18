@@ -330,7 +330,7 @@ const Dashboard = () => {
                 </Card>
 
                 <Card title={t('dashboard.paymentControl')} viewAllLink="/payments">
-                    <div style={{ overflowX: 'auto' }}>
+                    <div className="table-wrapper">
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>

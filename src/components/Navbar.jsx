@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -8,6 +8,7 @@ const Navbar = () => {
     const { t, toggleLanguage } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const links = [
         { to: '/', labelKey: 'nav.dashboard' },
@@ -29,34 +30,52 @@ const Navbar = () => {
         } catch (error) {
             console.error('Failed to log out', error);
         }
+        setIsMenuOpen(false);
     };
 
     return (
-        <nav className="glass navbar">
+        <nav className={`glass navbar${isMenuOpen ? ' navbar-open' : ''}`}>
             <Link to="/" className="navbar-brand-link">
                 <div className="navbar-brand">
                     KONDO
                 </div>
             </Link>
+            <button
+                type="button"
+                className="hamburger-menu"
+                onClick={() => setIsMenuOpen((prev) => !prev)}
+                aria-label="Toggle navigation menu"
+            >
+                <span className="hamburger-line" />
+                <span className="hamburger-line" />
+                <span className="hamburger-line" />
+            </button>
             <div className="navbar-right">
                 {links.map(link => (
                     <Link
                         key={link.to}
                         to={link.to}
                         className={`nav-link${location.pathname === link.to ? ' nav-link-active' : ''}`}
+                        onClick={() => setIsMenuOpen(false)}
                     >
                         {t(link.labelKey)}
                     </Link>
                 ))}
                 <button
                     type="button"
-                    onClick={toggleLanguage}
+                    onClick={() => {
+                        toggleLanguage();
+                        setIsMenuOpen(false);
+                    }}
                     className="nav-link"
                     style={{ paddingInline: '0.75rem' }}
                 >
                     {t('nav.languageToggle')}
                 </button>
-                <button onClick={handleLogout} className="btn-logout">
+                <button
+                    onClick={handleLogout}
+                    className="btn-logout"
+                >
                     {t('nav.signOut')}
                 </button>
                 <div style={{

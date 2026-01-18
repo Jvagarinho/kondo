@@ -19,7 +19,7 @@ const SignIn = () => {
             setLoading(true);
             await login(email, password);
             navigate('/');
-        } catch (err) {
+        } catch {
             setError(t('auth.signIn.error'));
         }
         setLoading(false);

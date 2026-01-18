@@ -174,6 +174,30 @@ body {
   gap: 1.5rem;
 }
 
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--accent-color);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.hamburger-line {
+  width: 20px;
+  height: 2px;
+  background: var(--accent-color);
+  border-radius: 2px;
+}
+
+.hamburger-menu:active {
+  transform: scale(0.96);
+}
+
 .btn-secondary {
   background: white;
   color: var(--accent-color);
@@ -306,19 +330,65 @@ body {
   width: 100%;
 }
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media (max-width: 768px) {
   .navbar {
     padding: 0.75rem 1rem;
     margin: 0.5rem;
     gap: 0.75rem;
+    flex-direction: row;
+    align-items: center;
   }
 
   .navbar-right {
+    position: absolute;
+    top: 100%;
+    right: 1rem;
+    margin-top: 0.5rem;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
     gap: 0.75rem;
+    padding: 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    min-width: 180px;
+    z-index: 999;
+  }
+
+  .navbar-open .navbar-right {
+    display: flex;
+  }
+
+  .hamburger-menu {
+    display: flex;
   }
 
   .navbar-brand {
     font-size: 1.25rem;
+  }
+
+  .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .navbar-right .nav-link,
+  .navbar-right .btn-logout {
+    width: 100%;
+    text-align: left;
+  }
+
+  .btn-logout {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
   }
 
   .premium-card {
@@ -354,6 +424,10 @@ body {
   .dashboard-grid {
     gap: 2.5rem;
   }
+
+  .navbar {
+    margin: 0.5rem 0.5rem 0.25rem;
+  }
   
   .notices-list, .documents-grid {
     gap: 2rem;
@@ -361,6 +435,22 @@ body {
   
   .notice-item, .document-item {
     margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-wrapper table th,
+  .table-wrapper table td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-wrapper table th,
+  .table-wrapper table td {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.75rem;
   }
 }
 
@@ -388,4 +478,3 @@ body {
   transform: translateY(-4px);
   box-shadow: 0 8px 12px rgba(0,0,0,0.05);
 }
-

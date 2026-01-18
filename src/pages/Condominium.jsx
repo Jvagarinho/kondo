@@ -199,7 +199,7 @@ const Condominium = () => {
                                             setCreating(true);
                                             setError(null);
 
-                                            const { data, error: insertError } = await supabase
+        const { error: insertError } = await supabase
                                                 .from('kondo_condominiums')
                                                 .insert([{
                                                     name: newName.trim(),
