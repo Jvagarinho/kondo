@@ -115,7 +115,7 @@ const Payments = () => {
                         <h2 style={{ fontSize: '1.75rem', fontWeight: '700' }}>{t('payments.title')}</h2>
                         {isAdmin && (
                             <button onClick={() => setShowPaymentModal(true)} className="btn-primary">
-                                + Add Record
+                                {t('payments.addRecordButton')}
                             </button>
                         )}
                     </div>
