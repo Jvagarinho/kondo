@@ -15,9 +15,11 @@ export function useAuth(): AuthContextType {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null);
+  const [session, setSession] = useState<SupabaseUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [condominiumId, setCondominiumId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   async function signUp(email: string, password: string, name: string): Promise<User> {
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -26,7 +28,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: {
         data: {
           full_name: name,
-        }
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`
       }
     });
 
@@ -51,17 +54,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   }
 
+  async function sendVerificationEmail(): Promise<void> {
+    if (!currentUser?.email) throw new Error('No user logged in');
+
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: currentUser.email,
+    });
+
+    if (error) throw error;
+  }
+
+  async function changePassword(newPassword: string): Promise<void> {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) throw error;
+  }
+
+  async function updateProfile(updates: Partial<User>): Promise<User> {
+    const { data, error } = await supabase.auth.updateUser({
+      data: updates.user_metadata || {}
+    });
+
+    if (error) throw error;
+    return data.user as unknown as User;
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      handleAuthStateChange(session?.user ?? null);
+      handleAuthStateChange(session?.user ?? null, session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleAuthStateChange(session?.user ?? null);
+      handleAuthStateChange(session?.user ?? null, session);
     });
 
-    async function handleAuthStateChange(user: SupabaseUser | null) {
+    async function handleAuthStateChange(user: SupabaseUser | null, session: any) {
       setCurrentUser(user);
+      setSession(session);
+      setEmailVerified(session?.user?.email_confirmed_at ? true : false);
+
       if (user) {
         try {
           const { data, error } = await supabase
@@ -97,11 +131,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     currentUser: currentUser as unknown as User,
+    session,
     isAdmin,
     condominiumId,
+    emailVerified,
     signUp,
     login,
-    logout
+    logout,
+    sendVerificationEmail,
+    changePassword,
+    updateProfile
   };
 
   return (

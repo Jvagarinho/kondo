@@ -8,14 +8,19 @@ export interface User {
   };
 }
 
-export interface AuthContextType {
-  currentUser: User | null;
-  isAdmin: boolean;
-  condominiumId: string | null;
-  signUp: (email: string, password: string, name: string) => Promise<User>;
-  login: (email: string, password: string) => Promise<User>;
-  logout: () => Promise<void>;
-}
+ export interface AuthContextType {
+   currentUser: User | null;
+   session: any;
+   isAdmin: boolean;
+   condominiumId: string | null;
+   emailVerified: boolean;
+   signUp: (email: string, password: string, name: string) => Promise<User>;
+   login: (email: string, password: string) => Promise<User>;
+   logout: () => Promise<void>;
+   sendVerificationEmail: () => Promise<void>;
+   changePassword: (newPassword: string) => Promise<void>;
+   updateProfile: (updates: Partial<User>) => Promise<User>;
+ }
 
 export interface SignUpCredentials {
   email: string;

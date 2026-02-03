@@ -9,6 +9,9 @@ import Payments from './pages/Payments';
 import Profile from './pages/Profile';
 import Condominium from './pages/Condominium';
 import Users from './pages/Users';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import EmailVerification from './pages/EmailVerification';
 import { useAuth } from './contexts/AuthContext';
 
 interface PrivateRouteProps {
@@ -26,6 +29,9 @@ function App() {
       <Routes>
         <Route path="/login" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<EmailVerification />} />
         <Route
           path="/"
           element={
