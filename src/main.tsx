@@ -9,37 +9,13 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastContainer } from 'react-toastify'
 import ErrorBoundary from './components/ErrorBoundary'
 
-import { useTheme } from './contexts/ThemeContext';
-
-const AppWrapper = () => {
-  const { theme } = useTheme();
-
-  return (
-    <>
-      <App />
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme={theme}
-      />
-    </>
-  );
-};
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <LanguageProvider>
         <ThemeProvider>
           <AuthProvider>
-            <AppWrapper />
+            <App />
           </AuthProvider>
         </ThemeProvider>
       </LanguageProvider>

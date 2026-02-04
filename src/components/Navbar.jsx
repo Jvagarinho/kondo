@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
     const { currentUser, logout, isAdmin } = useAuth();
@@ -80,7 +79,6 @@ const Navbar = () => {
                 >
                     {t('nav.signOut')}
                 </button>
-                <ThemeToggle />
                 <div style={{
                     width: '40px',
                     height: '40px',
