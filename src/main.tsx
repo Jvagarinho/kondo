@@ -7,12 +7,14 @@ import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { ToastContainer } from 'react-toastify'
 import ErrorBoundary from './components/ErrorBoundary'
+import { ParticleBackground } from './components/effects/ParticleBackground.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <LanguageProvider>
         <AuthProvider>
+          <ParticleBackground />
           <App />
           <ToastContainer
             position="top-right"
