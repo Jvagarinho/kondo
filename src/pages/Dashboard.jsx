@@ -260,7 +260,7 @@ const Dashboard = () => {
                 <h1 style={{ fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
                     {t('dashboard.welcome')}, {currentUser?.user_metadata?.name || currentUser?.email}
                 </h1>
-                <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)' }}>
+                <p style={{ fontSize: '0.95rem', color: 'var(--text-on-highlight)', fontWeight: '500' }}>
                     {t('dashboard.subtitle')}
                 </p>
             </section>

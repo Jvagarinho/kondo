@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Enable Tailwind Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
 :root {
   /* Light Mode */
   --primary-bg: #fdfeff;
@@ -31,20 +38,27 @@
   --primary-bg: #000000;
   --secondary-bg: #111827;
   --accent-color: #3b82f6;
-  --accent-glow: rgba(59, 130, 246, 0.3);
-  --text-primary: #ffffff;
+  --accent-glow: rgba(96, 165, 250, 0.3);
+  --text-primary: #f8fafc;
   --text-secondary: #e5e7eb;
   --glass-bg: rgba(17, 24, 39, 0.95);
-  --glass-border: rgba(59, 130, 246, 0.4);
+  --glass-border: rgba(56, 189, 248, 0.3);
   --card-shadow: 0 15px 40px -15px rgba(0, 0, 0, 0.5), 0 6px 10px -6px rgba(0, 0, 0, 0.3);
-  --highlight-blue: #60a5fa;
-  --highlight-purple: #818cf8;
-  --urgent-bg: #7f1d1d;
+  --highlight-blue: #3b82f6;
+  --highlight-purple: #a78bfa;
+  --urgent-bg: #1e40af;
   --urgent-border: #ef4444;
   --success-bg: #166534;
   --success-text: #4ade80;
   --pending-bg: #1e40af;
-  --pending-text: #93c5fd;
+  --pending-text: #fbbf24;
+  
+  /* High contrast text for dark backgrounds */
+  --text-on-dark-bg: #ffffff;
+  --text-on-accent: #ffffff;
+  
+  /* High contrast text on light backgrounds */
+  --text-on-highlight: #0f172a;
 }
 
 * {
@@ -332,10 +346,6 @@ body {
 /* Navbar Right Items - Spacing and Hover */
 .navbar-right {
   transition: all 0.2s ease;
-}
-
-.navbar-right:hover {
-  transform: translateY(-1px);
 }
 
 .auth-layout {
