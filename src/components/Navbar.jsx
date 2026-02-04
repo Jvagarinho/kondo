@@ -67,11 +67,15 @@ const Navbar = () => {
                         toggleLanguage();
                         setIsMenuOpen(false);
                     }}
-                    className="nav-link language-toggle"
+                    className="nav-link language-toggle language-btn"
                     style={{ paddingInline: '0.75rem' }}
                     title={t('nav.languageToggle')}
                 >
-                    {t('nav.languageToggle')}
+                    <span className="language-text">{t('nav.languageToggle')}</span>
+                    <svg className="language-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 5h6M21 12a9 9 0 11.21 0 9 0 11.21 0 00-4.41 2.86-7.4 41 7h-4.13l2.65-2.66a.5.5 0 01.7.29-.71l2.65 2.66c.19.19.34.28.5.28h.01zm-6.28 3.72c.78-.6 1.28-1.18 2-1.72zm0 0h4v1M5 9a9 9 0 111.21 0 9 0 11.21 0 00-4.41 2.86-7.4 41 7H14a8 9 0 112.32 9 0 111.21 0 00-4.41 2.86-7.4 41 7a5 5 0 11.21 0 01-1.6-1.6-1.73A3 7 3-2.59 9 0 111.21 0 00-4.41 2.86-7.4 41 7z" />
+                    </svg>
+                    <span className="lang-code">{t('nav.languageToggle').split(' ')[0]}</span>
                 </button>
                 <button
                     onClick={handleLogout}
