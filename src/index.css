@@ -2,15 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Enable Tailwind Dark Mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-  }
-}
-
 :root {
-  /* Light Mode */
+  /* Light Mode Only */
   --primary-bg: #fdfeff;
   --secondary-bg: #ffffff;
   --accent-color: #0284c7;
@@ -22,7 +15,7 @@
   --card-shadow: 0 10px 30px -10px rgba(2, 132, 199, 0.15), 0 4px 6px -4px rgba(2, 132, 199, 0.1);
   --font-main: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
 
-  /* New Color Accents */
+  /* Color Accents */
   --highlight-blue: #e0f2fe;
   --highlight-purple: #f5f3ff;
   --urgent-bg: #fef2f2;
@@ -31,34 +24,6 @@
   --success-text: #16a34a;
   --pending-bg: #fefce8;
   --pending-text: #ca8a04;
-}
-
-.dark {
-  /* Dark Mode - High Contrast Version */
-  --primary-bg: #000000;
-  --secondary-bg: #111827;
-  --accent-color: #3b82f6;
-  --accent-glow: rgba(96, 165, 250, 0.3);
-  --text-primary: #f8fafc;
-  --text-secondary: #e5e7eb;
-  --glass-bg: rgba(17, 24, 39, 0.95);
-  --glass-border: rgba(56, 189, 248, 0.3);
-  --card-shadow: 0 15px 40px -15px rgba(0, 0, 0, 0.5), 0 6px 10px -6px rgba(0, 0, 0, 0.3);
-  --highlight-blue: #3b82f6;
-  --highlight-purple: #a78bfa;
-  --urgent-bg: #1e40af;
-  --urgent-border: #ef4444;
-  --success-bg: #166534;
-  --success-text: #4ade80;
-  --pending-bg: #1e40af;
-  --pending-text: #fbbf24;
-  
-  /* High contrast text for dark backgrounds */
-  --text-on-dark-bg: #ffffff;
-  --text-on-accent: #ffffff;
-  
-  /* High contrast text on light backgrounds */
-  --text-on-highlight: #0f172a;
 }
 
 * {
@@ -332,17 +297,6 @@ body {
   transform: translateY(-1px);
 }
 
-.dark .language-toggle {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.dark .language-toggle:hover {
-  background: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
 /* Navbar Right Items - Spacing and Hover */
 .navbar-right {
   transition: all 0.2s ease;
@@ -530,14 +484,7 @@ body {
   transform: translateY(-1px);
 }
 
-.dark .language-btn {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
-}
 
-.dark .language-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
 
 @media (max-width: 480px) {
   .table-wrapper table th,

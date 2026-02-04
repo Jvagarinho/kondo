@@ -5,7 +5,6 @@ import App from './App.tsx'
 
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/LanguageContext'
-import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastContainer } from 'react-toastify'
 import ErrorBoundary from './components/ErrorBoundary'
 
@@ -13,11 +12,21 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary>
       <LanguageProvider>
-        <ThemeProvider>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <App />
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+        </AuthProvider>
       </LanguageProvider>
     </ErrorBoundary>
   </StrictMode>,
