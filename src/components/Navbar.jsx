@@ -68,8 +68,9 @@ const Navbar = () => {
                         toggleLanguage();
                         setIsMenuOpen(false);
                     }}
-                    className="nav-link"
+                    className="nav-link language-toggle"
                     style={{ paddingInline: '0.75rem' }}
+                    title={t('nav.languageToggle')}
                 >
                     {t('nav.languageToggle')}
                 </button>

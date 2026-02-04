@@ -27,24 +27,24 @@
 }
 
 .dark {
-  /* Dark Mode - Improved Contrast */
-  --primary-bg: #0f172a;
-  --secondary-bg: #1e293b;
-  --accent-color: #60a5fa;
-  --accent-glow: rgba(96, 165, 250, 0.2);
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --glass-bg: rgba(30, 41, 59, 0.9);
-  --glass-border: rgba(56, 189, 248, 0.25);
-  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.25);
-  --highlight-blue: #3b82f6;
-  --highlight-purple: #a78bfa;
-  --urgent-bg: #991b1b;
+  /* Dark Mode - High Contrast Version */
+  --primary-bg: #000000;
+  --secondary-bg: #111827;
+  --accent-color: #3b82f6;
+  --accent-glow: rgba(59, 130, 246, 0.3);
+  --text-primary: #ffffff;
+  --text-secondary: #e5e7eb;
+  --glass-bg: rgba(17, 24, 39, 0.95);
+  --glass-border: rgba(59, 130, 246, 0.4);
+  --card-shadow: 0 15px 40px -15px rgba(0, 0, 0, 0.5), 0 6px 10px -6px rgba(0, 0, 0, 0.3);
+  --highlight-blue: #60a5fa;
+  --highlight-purple: #818cf8;
+  --urgent-bg: #7f1d1d;
   --urgent-border: #ef4444;
   --success-bg: #166534;
   --success-text: #4ade80;
-  --pending-bg: #854d0e;
-  --pending-text: #fbbf24;
+  --pending-bg: #1e40af;
+  --pending-text: #93c5fd;
 }
 
 * {
@@ -300,6 +300,21 @@ body {
   background: var(--accent-color);
   color: #ffffff;
   box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+}
+
+/* Language Toggle Button - Improved Contrast */
+.language-toggle {
+  position: relative;
+}
+
+.dark .language-toggle {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .language-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
 }
 
 .auth-layout {
