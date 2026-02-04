@@ -51,7 +51,7 @@ const Navbar = () => {
                 <span className="hamburger-line" />
                 <span className="hamburger-line" />
             </button>
-            <div className="navbar-right">
+            <div className="navbar-right" style={{ marginLeft: '2rem' }}>
                 {links.map(link => (
                     <Link
                         key={link.to}

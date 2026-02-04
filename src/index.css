@@ -182,6 +182,12 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
+  gap: 1rem;
+}
+
+.navbar-brand-link {
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
 .navbar-brand-link {
@@ -305,16 +311,31 @@ body {
 /* Language Toggle Button - Improved Contrast */
 .language-toggle {
   position: relative;
+  transition: all 0.2s ease;
+}
+
+.language-toggle:hover {
+  transform: translateY(-1px);
 }
 
 .dark .language-toggle {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .dark .language-toggle:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.25);
   color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Navbar Right Items - Spacing and Hover */
+.navbar-right {
+  transition: all 0.2s ease;
+}
+
+.navbar-right:hover {
+  transform: translateY(-1px);
 }
 
 .auth-layout {
