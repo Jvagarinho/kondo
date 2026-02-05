@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import ModernSearchBar from './ui/ModernSearchBar';
+import ElegantSearchBar from './ui/ElegantSearchBar';
 
 const Navbar = () => {
     const { currentUser, logout, isAdmin } = useAuth();
@@ -73,8 +73,8 @@ const Navbar = () => {
                 >
                     {t('nav.languageToggle')}
                 </button>
-                {/* Modern Search Bar */}
-                <ModernSearchBar 
+                {/* Elegant Search Bar */}
+                <ElegantSearchBar 
                     placeholder={t('dashboard.searchPlaceholder') || 'Search...'}
                     onSearch={(query) => {
                         // Dispatch custom event for Dashboard to listen
