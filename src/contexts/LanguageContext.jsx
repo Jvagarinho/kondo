@@ -62,6 +62,7 @@ export const translations = {
         'dashboard.table.month': 'Month',
         'dashboard.table.status': 'Status',
         'dashboard.table.actions': 'Actions',
+        'dashboard.searchPlaceholder': 'Search notices, payments, documents...',
 
         'notices.title': 'Notices & Alerts',
         'notices.newAlertButton': '+ New Alert',
@@ -201,6 +202,7 @@ export const translations = {
         'dashboard.table.month': 'Mês',
         'dashboard.table.status': 'Estado',
         'dashboard.table.actions': 'Ações',
+        'dashboard.searchPlaceholder': 'Pesquisar avisos, pagamentos, documentos...',
 
         'notices.title': 'Avisos e alertas',
         'notices.newAlertButton': '+ Novo aviso',
