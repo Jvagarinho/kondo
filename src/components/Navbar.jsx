@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import SearchBar from './ui/SearchBar';
 
 const Navbar = () => {
     const { currentUser, logout, isAdmin } = useAuth();
@@ -72,24 +73,40 @@ const Navbar = () => {
                 >
                     {t('nav.languageToggle')}
                 </button>
-                <button
-                    onClick={handleLogout}
-                    className="btn-logout"
-                >
-                    {t('nav.signOut')}
-                </button>
-                <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: 'var(--accent-glow)',
-                    color: 'var(--accent-color)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: '600'
-                }}>
-                    {currentUser?.email?.substring(0, 2).toUpperCase()}
+                <div className="flex items-center gap-2">
+                    <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        background: 'var(--accent-glow)',
+                        color: 'var(--accent-color)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: '600',
+                        fontSize: '0.85rem'
+                    }}>
+                        {currentUser?.email?.substring(0, 2).toUpperCase()}
+                    </div>
+                    <button
+                        onClick={handleLogout}
+                        className="btn-logout"
+                    >
+                        {t('nav.signOut')}
+                    </button>
+                </div>
+                
+                {/* Search Button - Modern & Positioned Below Sign Out */}
+                <div className="mt-2">
+                    <SearchBar 
+                        placeholder={t('dashboard.searchPlaceholder') || 'Search...'}
+                        onSearch={(query) => {
+                            // Navigate to dashboard with search param
+                            if (query) {
+                                navigate(`/?search=${encodeURIComponent(query)}`);
+                            }
+                        }}
+                    />
                 </div>
             </div>
         </nav>
