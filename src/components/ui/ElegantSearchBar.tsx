@@ -51,7 +51,8 @@ const ElegantSearchBar = ({
           line-height: 28px;
           align-items: center;
           position: relative;
-          max-width: 220px;
+          max-width: 320px;
+          width: 320px;
         }
 
         .elegant-input {
@@ -59,7 +60,7 @@ const ElegantSearchBar = ({
           width: 100%;
           height: 42px;
           padding-left: 2.5rem;
-          padding-right: 1rem;
+          padding-right: 1.5rem;
           box-shadow: 0 0 0 1.5px #e2e8f0, 0 4px 20px -10px rgba(0, 0, 0, 0.15);
           border: 0;
           border-radius: 12px;
