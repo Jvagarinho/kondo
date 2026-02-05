@@ -4,7 +4,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
-import SearchBar from '../components/ui/SearchBar';
 import { useDebounce } from '../hooks/useDebounce';
 
 const Card = ({ title, children, action, viewAllLink }) => {
@@ -117,6 +116,18 @@ const Dashboard = () => {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    // Listen for search events from navbar
+    useEffect(() => {
+        const handleSearch = (event) => {
+            setSearchQuery(event.detail);
+        };
+        
+        window.addEventListener('navbar-search', handleSearch);
+        return () => {
+            window.removeEventListener('navbar-search', handleSearch);
+        };
+    }, []);
 
     // Filter function for search
     const filterItems = (items, fields) => {
@@ -292,15 +303,6 @@ const Dashboard = () => {
                 <p style={{ fontSize: '0.95rem', color: 'var(--text-on-highlight)', fontWeight: '500' }}>
                     {t('dashboard.subtitle')}
                 </p>
-            </section>
-
-            {/* Global Search Bar */}
-            <section style={{ padding: '0 2rem', marginBottom: '1.5rem', maxWidth: '600px' }}>
-                <SearchBar 
-                    placeholder={t('dashboard.searchPlaceholder')}
-                    onSearch={setSearchQuery}
-                    value={searchQuery}
-                />
             </section>
 
             <main className="dashboard-grid">

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import SearchBar from './ui/SearchBar';
+import ModernSearchBar from './ui/ModernSearchBar';
 
 const Navbar = () => {
     const { currentUser, logout, isAdmin } = useAuth();
@@ -73,6 +73,15 @@ const Navbar = () => {
                 >
                     {t('nav.languageToggle')}
                 </button>
+                {/* Modern Search Bar */}
+                <ModernSearchBar 
+                    placeholder={t('dashboard.searchPlaceholder') || 'Search...'}
+                    onSearch={(query) => {
+                        // Dispatch custom event for Dashboard to listen
+                        window.dispatchEvent(new CustomEvent('navbar-search', { detail: query }));
+                    }}
+                />
+
                 <div className="flex items-center gap-2">
                     <div style={{
                         width: '36px',
@@ -94,19 +103,6 @@ const Navbar = () => {
                     >
                         {t('nav.signOut')}
                     </button>
-                </div>
-                
-                {/* Search Button - Modern & Positioned Below Sign Out */}
-                <div className="mt-2">
-                    <SearchBar 
-                        placeholder={t('dashboard.searchPlaceholder') || 'Search...'}
-                        onSearch={(query) => {
-                            // Navigate to dashboard with search param
-                            if (query) {
-                                navigate(`/?search=${encodeURIComponent(query)}`);
-                            }
-                        }}
-                    />
                 </div>
             </div>
         </nav>
