@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
+import SearchBar from '../components/ui/SearchBar';
+import { useDebounce } from '../hooks/useDebounce';
 
 const Card = ({ title, children, action, viewAllLink }) => {
     const { t } = useLanguage();
@@ -44,6 +46,10 @@ const Dashboard = () => {
         status: 'Pending',
         month: new Date().toISOString().slice(0, 7) // Default to current month YYYY-MM
     });
+    
+    // Search states
+    const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearch = useDebounce(searchQuery, 300);
 
     const fetchNotices = useCallback(async () => {
         let query = supabase
@@ -111,6 +117,29 @@ const Dashboard = () => {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    // Filter function for search
+    const filterItems = (items, fields) => {
+        if (!debouncedSearch) return items;
+        const query = debouncedSearch.toLowerCase();
+        return items.filter(item => 
+            fields.some(field => {
+                const value = item[field];
+                return value && value.toString().toLowerCase().includes(query);
+            })
+        );
+    };
+
+    const filteredNotices = filterItems(notices, ['title', 'content']);
+    const filteredPayments = filterItems(payments, ['owner_name', 'unit', 'status']);
+    const filteredDocuments = filterItems(documents, ['name']);
+
+    // Highlight search matches
+    const highlightMatch = (text, query) => {
+        if (!query || !text) return text;
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<mark style="background: rgba(2, 132, 199, 0.2); padding: 0 2px; border-radius: 2px;">$1</mark>');
+    };
 
     const handleAddNotice = async (e) => {
         e.preventDefault();
@@ -265,6 +294,15 @@ const Dashboard = () => {
                 </p>
             </section>
 
+            {/* Global Search Bar */}
+            <section style={{ padding: '0 2rem', marginBottom: '1.5rem' }}>
+                <SearchBar 
+                    placeholder={t('dashboard.searchPlaceholder') || 'Search notices, payments, documents...'}
+                    onSearch={setSearchQuery}
+                    value={searchQuery}
+                />
+            </section>
+
             <main className="dashboard-grid">
 
                 <Card
@@ -283,10 +321,12 @@ const Dashboard = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                         {loading ? (
                             <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.loadingNotices')}</p>
-                        ) : notices.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.noNotices')}</p>
+                        ) : filteredNotices.length === 0 ? (
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
+                                {debouncedSearch ? t('dashboard.noSearchResults') || 'No notices match your search' : t('dashboard.noNotices')}
+                            </p>
                         ) : (
-                            notices.slice(0, 4).map(notice => (
+                            filteredNotices.slice(0, 4).map(notice => (
                                 <div key={notice.id} style={{
                                     padding: '1.25rem',
                                     borderRadius: '12px',
@@ -344,10 +384,12 @@ const Dashboard = () => {
                             <tbody>
                                 {loading ? (
                                     <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>{t('dashboard.loadingPayments')}</td></tr>
-                                ) : payments.length === 0 ? (
-                                    <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>{t('dashboard.noPayments')}</td></tr>
+                                ) : filteredPayments.length === 0 ? (
+                                    <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>
+                                        {debouncedSearch ? t('dashboard.noSearchResults') || 'No payments match your search' : t('dashboard.noPayments')}
+                                    </td></tr>
                                 ) : (
-                                    payments.slice(0, 4).map((p) => (
+                                    filteredPayments.slice(0, 4).map((p) => (
                                         <tr key={p.id} style={{ borderBottom: '1px solid var(--glass-border)', fontSize: '0.9rem' }}>
                                             <td style={{ padding: '1rem 0.5rem' }}>{p.owner_name}</td>
                                             <td style={{ padding: '1rem 0.5rem' }}>{p.unit}</td>
@@ -420,10 +462,12 @@ const Dashboard = () => {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                         {loading ? (
                             <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.loadingDocuments')}</p>
-                        ) : documents.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.noDocuments')}</p>
+                        ) : filteredDocuments.length === 0 ? (
+                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
+                                {debouncedSearch ? t('dashboard.noSearchResults') || 'No documents match your search' : t('dashboard.noDocuments')}
+                            </p>
                         ) : (
-                            documents.slice(0, 4).map((doc) => (
+                            filteredDocuments.slice(0, 4).map((doc) => (
                                 <div key={doc.id} style={{
                                     display: 'flex',
                                     alignItems: 'center',
