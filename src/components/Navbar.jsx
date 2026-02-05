@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import ElegantSearchBar from './ui/ElegantSearchBar';
 
 const Navbar = () => {
     const { currentUser, logout, isAdmin } = useAuth();
@@ -73,14 +72,6 @@ const Navbar = () => {
                 >
                     {t('nav.languageToggle')}
                 </button>
-                {/* Elegant Search Bar */}
-                <ElegantSearchBar 
-                    placeholder={t('dashboard.searchPlaceholder') || 'Search...'}
-                    onSearch={(query) => {
-                        // Dispatch custom event for Dashboard to listen
-                        window.dispatchEvent(new CustomEvent('navbar-search', { detail: query }));
-                    }}
-                />
 
                 <div className="flex items-center gap-2">
                     <div style={{

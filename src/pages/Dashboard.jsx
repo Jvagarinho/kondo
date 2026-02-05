@@ -5,6 +5,7 @@ import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useDebounce } from '../hooks/useDebounce';
+import ElegantSearchBar from '../components/ui/ElegantSearchBar';
 
 const Card = ({ title, children, action, viewAllLink }) => {
     const { t } = useLanguage();
@@ -116,18 +117,6 @@ const Dashboard = () => {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
-
-    // Listen for search events from navbar
-    useEffect(() => {
-        const handleSearch = (event) => {
-            setSearchQuery(event.detail);
-        };
-        
-        window.addEventListener('navbar-search', handleSearch);
-        return () => {
-            window.removeEventListener('navbar-search', handleSearch);
-        };
-    }, []);
 
     // Filter function for search
     const filterItems = (items, fields) => {
@@ -303,6 +292,39 @@ const Dashboard = () => {
                 <p style={{ fontSize: '0.95rem', color: 'var(--text-on-highlight)', fontWeight: '500' }}>
                     {t('dashboard.subtitle')}
                 </p>
+            </section>
+
+            {/* Search Section - Destacada */}
+            <section style={{ 
+                padding: '1.5rem 2rem',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+            }}>
+                <div style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: '16px',
+                    padding: '1.5rem 2rem',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.5)',
+                    width: '100%',
+                    maxWidth: '700px'
+                }}>
+                    <p style={{ 
+                        fontSize: '0.9rem', 
+                        color: 'var(--text-secondary)', 
+                        marginBottom: '0.75rem',
+                        textAlign: 'center'
+                    }}>
+                        {t('dashboard.searchTitle') || 'Search across all content'}
+                    </p>
+                    <ElegantSearchBar 
+                        placeholder={t('dashboard.searchPlaceholder') || 'Search notices, payments, documents...'}
+                        onSearch={setSearchQuery}
+                        value={searchQuery}
+                    />
+                </div>
             </section>
 
             <main className="dashboard-grid">
