@@ -97,14 +97,15 @@ const SearchBar = ({
           </motion.button>
         )}
 
-        {/* Focus Glow Effect */}
+        {/* Focus Glow Effect - Simplified */}
         {isFocused && (
           <motion.div
             layoutId="search-glow"
-            className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#0284c7]/20 to-purple-500/20 -z-10 blur-xl"
+            className="absolute inset-0 rounded-xl bg-[#0284c7]/10 -z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            style={{ boxShadow: '0 0 20px rgba(2, 132, 199, 0.15)' }}
           />
         )}
       </div>

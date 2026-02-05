@@ -297,7 +297,7 @@ const Dashboard = () => {
             {/* Global Search Bar */}
             <section style={{ padding: '0 2rem', marginBottom: '1.5rem' }}>
                 <SearchBar 
-                    placeholder={t('dashboard.searchPlaceholder') || 'Search notices, payments, documents...'}
+                    placeholder="Search notices, payments, documents..."
                     onSearch={setSearchQuery}
                     value={searchQuery}
                 />
