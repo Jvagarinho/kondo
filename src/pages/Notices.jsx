@@ -5,6 +5,10 @@ import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
 import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ConfirmDialog';
+import FormInput from '../components/FormInput';
+import FormTextArea from '../components/FormTextArea';
+import { noticeSchema } from '../lib/validation';
+import { useValidation } from '../hooks/useValidation';
 
 const Notices = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
@@ -12,13 +16,19 @@ const Notices = () => {
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showNoticeModal, setShowNoticeModal] = useState(false);
-    const [newNotice, setNewNotice] = useState({ title: '', content: '', urgent: false });
     
     // Confirm Dialog state
     const [confirmDialog, setConfirmDialog] = useState({
         isOpen: false,
         noticeId: null,
         noticeTitle: ''
+    });
+    
+    // Form validation
+    const [touchedFields, setTouchedFields] = useState({});
+    const { data: newNotice, errors, updateField, validateAll, reset } = useValidation({
+        schema: noticeSchema,
+        initialData: { title: '', content: '', urgent: false }
     });
 
     const fetchNotices = useCallback(async () => {
@@ -42,6 +52,14 @@ const Notices = () => {
 
     const handleAddNotice = async (e) => {
         e.preventDefault();
+        
+        // Mark all fields as touched
+        setTouchedFields({ title: true, content: true });
+        
+        if (!validateAll()) {
+            return;
+        }
+        
         const payload = {
             ...newNotice,
             author_id: currentUser.id
@@ -56,9 +74,25 @@ const Notices = () => {
         if (error) alert('Error adding notice: ' + error.message);
         else {
             setShowNoticeModal(false);
-            setNewNotice({ title: '', content: '', urgent: false });
+            reset();
+            setTouchedFields({});
             fetchNotices();
         }
+    };
+    
+    const handleFieldChange = (field) => (e) => {
+        const value = field === 'urgent' ? e.target.checked : e.target.value;
+        updateField(field, value);
+    };
+    
+    const handleFieldBlur = (field) => () => {
+        setTouchedFields(prev => ({ ...prev, [field]: true }));
+    };
+    
+    const closeModal = () => {
+        setShowNoticeModal(false);
+        reset();
+        setTouchedFields({});
     };
 
     const handleDeleteNotice = (id, title) => {
@@ -150,25 +184,43 @@ const Notices = () => {
                     background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000
                 }}>
-                    <div className="premium-card" style={{ width: '450px', margin: '1rem' }}>
+                    <div className="premium-card" style={{ width: '450px', margin: '1rem', maxHeight: '90vh', overflow: 'auto' }}>
                         <h3 style={{ marginBottom: '1.5rem' }}>{t('notices.modal.title')}</h3>
-                        <form onSubmit={handleAddNotice} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t('notices.modal.titleLabel')}</label>
-                                <input required className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '10px' }}
-                                    value={newNotice.title} onChange={e => setNewNotice({ ...newNotice, title: e.target.value })} />
+                        <form onSubmit={handleAddNotice} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                            <FormInput
+                                label={t('notices.modal.titleLabel')}
+                                value={newNotice.title}
+                                onChange={handleFieldChange('title')}
+                                onBlur={handleFieldBlur('title')}
+                                error={errors.title}
+                                touched={touchedFields.title}
+                                placeholder={t('notices.modal.titleLabel')}
+                                required
+                            />
+                            <FormTextArea
+                                label={t('notices.modal.contentLabel')}
+                                value={newNotice.content}
+                                onChange={handleFieldChange('content')}
+                                onBlur={handleFieldBlur('content')}
+                                error={errors.content}
+                                touched={touchedFields.content}
+                                placeholder={t('notices.modal.contentLabel')}
+                                required
+                                rows={4}
+                                maxLength={2000}
+                            />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' }}>
+                                <input 
+                                    type="checkbox" 
+                                    id="urgent" 
+                                    checked={newNotice.urgent} 
+                                    onChange={handleFieldChange('urgent')}
+                                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                                />
+                                <label htmlFor="urgent" style={{ fontSize: '0.95rem', cursor: 'pointer', userSelect: 'none' }}>{t('notices.modal.markUrgent')}</label>
                             </div>
-                            <div>
-                                <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem', fontWeight: '500' }}>{t('notices.modal.contentLabel')}</label>
-                                <textarea required rows="5" className="glass" style={{ width: '100%', padding: '0.8rem', borderRadius: '10px', resize: 'none' }}
-                                    value={newNotice.content} onChange={e => setNewNotice({ ...newNotice, content: e.target.value })} />
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <input type="checkbox" id="urgent" checked={newNotice.urgent} onChange={e => setNewNotice({ ...newNotice, urgent: e.target.checked })} />
-                                <label htmlFor="urgent" style={{ fontSize: '0.95rem', cursor: 'pointer' }}>{t('notices.modal.markUrgent')}</label>
-                            </div>
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                                <button type="button" onClick={() => setShowNoticeModal(false)} className="nav-link" style={{ flex: 1 }}>{t('common.cancel')}</button>
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                                <button type="button" onClick={closeModal} className="nav-link" style={{ flex: 1 }}>{t('common.cancel')}</button>
                                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>{t('notices.modal.submit')}</button>
                             </div>
                         </form>
