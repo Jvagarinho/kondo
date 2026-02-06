@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
+import EmptyState from '../components/EmptyState';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const Payments = () => {
     const { isAdmin, condominiumId } = useAuth();
@@ -17,6 +19,13 @@ const Payments = () => {
         amount: '',
         status: 'Pending',
         month: new Date().toISOString().slice(0, 7)
+    });
+    
+    // Confirm Dialog state
+    const [confirmDialog, setConfirmDialog] = useState({
+        isOpen: false,
+        paymentId: null,
+        ownerName: ''
     });
 
     const fetchPayments = useCallback(async () => {
@@ -98,11 +107,21 @@ const Payments = () => {
         else fetchPayments();
     };
 
-    const handleDeletePayment = async (id) => {
-        if (!window.confirm('Are you sure?')) return;
-        const { error } = await supabase.from('kondo_payments').delete().eq('id', id);
+    const handleDeletePayment = (id, ownerName) => {
+        setConfirmDialog({
+            isOpen: true,
+            paymentId: id,
+            ownerName: ownerName
+        });
+    };
+
+    const confirmDeletePayment = async () => {
+        const { error } = await supabase.from('kondo_payments').delete().eq('id', confirmDialog.paymentId);
         if (error) alert('Error deleting payment: ' + error.message);
-        else fetchPayments();
+        else {
+            fetchPayments();
+            setConfirmDialog({ isOpen: false, paymentId: null, ownerName: '' });
+        }
     };
 
     return (
@@ -121,7 +140,8 @@ const Payments = () => {
                     </div>
 
                     <div className="table-wrapper">
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        {/* Desktop Table */}
+                        <table className="desktop-only" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                                     <th style={{ padding: '1.25rem 1rem' }}>{t('payments.table.owner')}</th>
@@ -136,7 +156,18 @@ const Payments = () => {
                                 {loading ? (
                                     <tr><td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '2rem' }}>{t('payments.loading')}</td></tr>
                                 ) : payments.length === 0 ? (
-                                    <tr><td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '2rem' }}>{t('payments.empty')}</td></tr>
+                                    <tr>
+                                        <td colSpan={isAdmin ? 6 : 5} style={{ padding: 0 }}>
+                                            <div className="empty-state-table">
+                                                <EmptyState 
+                                                    type="payments" 
+                                                    compact={true}
+                                                    actionLabel={isAdmin ? t('payments.addRecordButton') : null}
+                                                    onAction={isAdmin ? () => setShowPaymentModal(true) : null}
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
                                 ) : (
                                     payments.map((p) => (
                                         <tr key={p.id} style={{ borderBottom: '1px solid var(--glass-border)', fontSize: '1rem', transition: 'background 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'var(--highlight-blue)'} onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
@@ -165,7 +196,7 @@ const Payments = () => {
                                             {isAdmin && (
                                                 <td style={{ padding: '1.25rem 1rem' }}>
                                                     <button
-                                                        onClick={() => handleDeletePayment(p.id)}
+                                                        onClick={() => handleDeletePayment(p.id, p.owner_name)}
                                                         className="icon-btn danger"
                                                         title="Delete record"
                                                     >
@@ -180,6 +211,86 @@ const Payments = () => {
                                 )}
                             </tbody>
                         </table>
+
+                        {/* Mobile Cards View */}
+                        <div className="mobile-only mobile-cards">
+                            {loading ? (
+                                <p style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>{t('payments.loading')}</p>
+                            ) : payments.length === 0 ? (
+                                <EmptyState 
+                                    type="payments" 
+                                    compact={true}
+                                    actionLabel={isAdmin ? t('payments.addRecordButton') : null}
+                                    onAction={isAdmin ? () => setShowPaymentModal(true) : null}
+                                />
+                            ) : (
+                                payments.map((p) => (
+                                    <div key={p.id} className="mobile-card-item">
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">{t('payments.table.owner')}</span>
+                                            <span className="mobile-card-value owner">{p.owner_name}</span>
+                                        </div>
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">{t('payments.table.unit')}</span>
+                                            <span className="mobile-card-value">{p.unit}</span>
+                                        </div>
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">{t('payments.table.month')}</span>
+                                            <span className="mobile-card-value">{p.month}</span>
+                                        </div>
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">{t('payments.table.amount')}</span>
+                                            <span className="mobile-card-value amount">${p.amount.toFixed(2)}</span>
+                                        </div>
+                                        <div className="mobile-card-row">
+                                            <span className="mobile-card-label">{t('payments.table.status')}</span>
+                                            <span className="mobile-card-value">
+                                                <span
+                                                    onClick={() => isAdmin && handleTogglePaymentStatus(p.id, p.status)}
+                                                    className="status-badge"
+                                                    style={{
+                                                        padding: '0.375rem 0.875rem',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.8rem',
+                                                        fontWeight: '600',
+                                                        background: p.status === 'Paid' ? 'var(--success-bg)' : 'var(--pending-bg)',
+                                                        color: p.status === 'Paid' ? 'var(--success-text)' : 'var(--pending-text)',
+                                                        border: p.status === 'Paid' ? '1px solid #bbf7d0' : '1px solid #fef08a',
+                                                        cursor: isAdmin ? 'pointer' : 'default',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.375rem'
+                                                    }}
+                                                >
+                                                    <span style={{
+                                                        width: '6px',
+                                                        height: '6px',
+                                                        borderRadius: '50%',
+                                                        background: p.status === 'Paid' ? 'var(--success-text)' : 'var(--pending-text)',
+                                                        display: 'inline-block'
+                                                    }} />
+                                                    {p.status}
+                                                </span>
+                                            </span>
+                                        </div>
+                                        {isAdmin && (
+                                            <div className="mobile-card-actions">
+                                                <button
+                                                    onClick={() => handleDeletePayment(p.id, p.owner_name)}
+                                                    className="icon-btn danger"
+                                                    title="Delete record"
+                                                    style={{ minWidth: '44px', minHeight: '44px' }}
+                                                >
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
             </main>
@@ -229,6 +340,19 @@ const Payments = () => {
                     </div>
                 </div>
             )}
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog({ isOpen: false, paymentId: null, ownerName: '' })}
+                onConfirm={confirmDeletePayment}
+                type="danger"
+                title={t('confirmDialog.danger.title')}
+                message={confirmDialog.ownerName
+                    ? `${t('paymentsPage.deleteConfirm')} ${t('payments.table.owner')}: "${confirmDialog.ownerName}"?`
+                    : t('confirmDialog.danger.message')
+                }
+                confirmLabel={t('confirmDialog.danger.confirm')}
+            />
         </div>
     );
 };

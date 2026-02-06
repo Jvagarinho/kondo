@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
+import EmptyState from '../components/EmptyState';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const Documents = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
@@ -10,6 +12,14 @@ const Documents = () => {
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    
+    // Confirm Dialog state
+    const [confirmDialog, setConfirmDialog] = useState({
+        isOpen: false,
+        documentId: null,
+        documentName: '',
+        filePath: ''
+    });
 
     const fetchDocuments = useCallback(async () => {
         setLoading(true);
@@ -70,22 +80,32 @@ const Documents = () => {
         setUploading(false);
     };
 
-    const handleDeleteDocument = async (id, filePath) => {
-        if (!window.confirm('Delete this document?')) return;
+    const handleDeleteDocument = (id, filePath, docName) => {
+        setConfirmDialog({
+            isOpen: true,
+            documentId: id,
+            documentName: docName,
+            filePath: filePath
+        });
+    };
 
+    const confirmDeleteDocument = async () => {
         const { error: storageError } = await supabase.storage
             .from('kondo_documents')
-            .remove([filePath]);
+            .remove([confirmDialog.filePath]);
 
         if (storageError) console.error('Error removing from storage:', storageError);
 
         const { error: dbError } = await supabase
             .from('kondo_documents')
             .delete()
-            .eq('id', id);
+            .eq('id', confirmDialog.documentId);
 
         if (dbError) alert('Error deleting document: ' + dbError.message);
-        else fetchDocuments();
+        else {
+            fetchDocuments();
+            setConfirmDialog({ isOpen: false, documentId: null, documentName: '', filePath: '' });
+        }
     };
 
     const handleDownloadDocument = async (filePath) => {
@@ -128,7 +148,13 @@ const Documents = () => {
                         {loading ? (
                             <p style={{ color: 'var(--text-secondary)', textAlign: 'center', gridColumn: '1 / -1' }}>{t('documents.loading')}</p>
                         ) : documents.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', gridColumn: '1 / -1' }}>{t('documents.empty')}</p>
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <EmptyState 
+                                    type="documents" 
+                                    actionLabel={isAdmin ? t('documents.uploadButton') : null}
+                                    onAction={isAdmin ? () => document.getElementById('page-doc-upload').click() : null}
+                                />
+                            </div>
                         ) : (
                             documents.map((doc) => (
                                 <div key={doc.id} className="document-item">
@@ -177,7 +203,7 @@ const Documents = () => {
                                         </button>
                                         {isAdmin && (
                                             <button
-                                                onClick={() => handleDeleteDocument(doc.id, doc.file_path)}
+                                                onClick={() => handleDeleteDocument(doc.id, doc.file_path, doc.name)}
                                                 className="btn-danger"
                                                 style={{ padding: '0.6rem 1rem' }}
                                                 title="Delete document"
@@ -194,6 +220,19 @@ const Documents = () => {
                     </div>
                 </div>
             </main>
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog({ isOpen: false, documentId: null, documentName: '', filePath: '' })}
+                onConfirm={confirmDeleteDocument}
+                type="danger"
+                title={t('confirmDialog.danger.title')}
+                message={confirmDialog.documentName
+                    ? `${t('documentsPage.deleteConfirm')} "${confirmDialog.documentName}"?`
+                    : t('confirmDialog.danger.message')
+                }
+                confirmLabel={t('confirmDialog.danger.confirm')}
+            />
         </div>
     );
 };

@@ -139,7 +139,36 @@ export const translations = {
         'noticesPage.deleteConfirm': 'Are you sure you want to delete this notice?',
         'paymentsPage.deleteConfirm': 'Are you sure?',
 
-        'common.cancel': 'Cancel'
+        'common.cancel': 'Cancel',
+
+        // Empty States
+        'emptyStates.notices.title': 'No notices yet',
+        'emptyStates.notices.message': 'There are no notices or alerts at the moment. Check back later for updates from your condominium.',
+        'emptyStates.payments.title': 'No payments recorded',
+        'emptyStates.payments.message': 'No payment records have been added yet. Payment information will appear here once available.',
+        'emptyStates.documents.title': 'No documents available',
+        'emptyStates.documents.message': 'The document repository is empty. Important files and documents will be shared here.',
+        'emptyStates.search.title': 'No results found',
+        'emptyStates.noSearchResults': 'No items match your search criteria. Try adjusting your search terms.',
+
+        // Confirm Dialog
+        'confirmDialog.danger.title': 'Are you sure?',
+        'confirmDialog.danger.message': 'This action cannot be undone. This will permanently delete the selected item.',
+        'confirmDialog.danger.confirm': 'Delete',
+        'confirmDialog.warning.title': 'Warning',
+        'confirmDialog.warning.message': 'Please confirm this action.',
+        'confirmDialog.warning.confirm': 'Confirm',
+        'confirmDialog.info.title': 'Information',
+        'confirmDialog.info.message': 'Please review and confirm.',
+        'confirmDialog.info.confirm': 'OK',
+        'confirmDialog.logout.title': 'Sign Out',
+        'confirmDialog.logout.message': 'Are you sure you want to sign out?',
+        'confirmDialog.logout.confirm': 'Sign Out',
+        'common.processing': 'Processing...',
+
+        // Table
+        'table.noData': 'No data available',
+        'table.actions': 'Actions'
     },
     pt: {
         'nav.dashboard': 'Painel',
@@ -279,7 +308,36 @@ export const translations = {
         'noticesPage.deleteConfirm': 'Tem a certeza que pretende eliminar este aviso?',
         'paymentsPage.deleteConfirm': 'Tem a certeza?',
 
-        'common.cancel': 'Cancelar'
+        'common.cancel': 'Cancelar',
+
+        // Empty States
+        'emptyStates.notices.title': 'Sem avisos',
+        'emptyStates.notices.message': 'De momento não existem avisos ou alertas. Volte mais tarde para ver atualizações do seu condomínio.',
+        'emptyStates.payments.title': 'Sem pagamentos registados',
+        'emptyStates.payments.message': 'Ainda não foram adicionados registos de pagamento. As informações de pagamento aparecerão aqui quando disponíveis.',
+        'emptyStates.documents.title': 'Sem documentos disponíveis',
+        'emptyStates.documents.message': 'O repositório de documentos está vazio. Ficheiros e documentos importantes serão partilhados aqui.',
+        'emptyStates.search.title': 'Nenhum resultado encontrado',
+        'emptyStates.noSearchResults': 'Nenhum item corresponde aos critérios de pesquisa. Tente ajustar os termos de pesquisa.',
+
+        // Confirm Dialog
+        'confirmDialog.danger.title': 'Tem a certeza?',
+        'confirmDialog.danger.message': 'Esta ação não pode ser desfeita. Isto irá eliminar permanentemente o item selecionado.',
+        'confirmDialog.danger.confirm': 'Eliminar',
+        'confirmDialog.warning.title': 'Aviso',
+        'confirmDialog.warning.message': 'Por favor confirme esta ação.',
+        'confirmDialog.warning.confirm': 'Confirmar',
+        'confirmDialog.info.title': 'Informação',
+        'confirmDialog.info.message': 'Por favor reveja e confirme.',
+        'confirmDialog.info.confirm': 'OK',
+        'confirmDialog.logout.title': 'Terminar sessão',
+        'confirmDialog.logout.message': 'Tem a certeza que pretende terminar a sessão?',
+        'confirmDialog.logout.confirm': 'Terminar sessão',
+        'common.processing': 'A processar...',
+
+        // Table
+        'table.noData': 'Não existem dados',
+        'table.actions': 'Ações'
     }
 };
 

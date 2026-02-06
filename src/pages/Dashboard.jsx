@@ -6,6 +6,8 @@ import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useDebounce } from '../hooks/useDebounce';
 import ElegantSearchBar from '../components/ui/ElegantSearchBar';
+import EmptyState from '../components/EmptyState';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const Card = ({ title, children, action, viewAllLink }) => {
     const { t } = useLanguage();
@@ -50,6 +52,24 @@ const Dashboard = () => {
     // Search states
     const [searchQuery, setSearchQuery] = useState('');
     const debouncedSearch = useDebounce(searchQuery, 300);
+    
+    // Confirm Dialog states
+    const [confirmDeleteNotice, setConfirmDeleteNotice] = useState({
+        isOpen: false,
+        noticeId: null,
+        noticeTitle: ''
+    });
+    const [confirmDeletePayment, setConfirmDeletePayment] = useState({
+        isOpen: false,
+        paymentId: null,
+        ownerName: ''
+    });
+    const [confirmDeleteDocument, setConfirmDeleteDocument] = useState({
+        isOpen: false,
+        documentId: null,
+        documentName: '',
+        filePath: ''
+    });
 
     const fetchNotices = useCallback(async () => {
         let query = supabase
@@ -162,11 +182,21 @@ const Dashboard = () => {
         }
     };
 
-    const handleDeleteNotice = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this notice?')) return;
-        const { error } = await supabase.from('kondo_notices').delete().eq('id', id);
+    const handleDeleteNotice = (id, title) => {
+        setConfirmDeleteNotice({
+            isOpen: true,
+            noticeId: id,
+            noticeTitle: title
+        });
+    };
+
+    const executeDeleteNotice = async () => {
+        const { error } = await supabase.from('kondo_notices').delete().eq('id', confirmDeleteNotice.noticeId);
         if (error) alert('Error deleting notice: ' + error.message);
-        else fetchNotices();
+        else {
+            fetchNotices();
+            setConfirmDeleteNotice({ isOpen: false, noticeId: null, noticeTitle: '' });
+        }
     };
 
     const handleAddPayment = async (e) => {
@@ -209,11 +239,21 @@ const Dashboard = () => {
         else fetchPayments();
     };
 
-    const handleDeletePayment = async (id) => {
-        if (!window.confirm('Are you sure?')) return;
-        const { error } = await supabase.from('kondo_payments').delete().eq('id', id);
+    const handleDeletePayment = (id, ownerName) => {
+        setConfirmDeletePayment({
+            isOpen: true,
+            paymentId: id,
+            ownerName: ownerName
+        });
+    };
+
+    const executeDeletePayment = async () => {
+        const { error } = await supabase.from('kondo_payments').delete().eq('id', confirmDeletePayment.paymentId);
         if (error) alert('Error deleting payment: ' + error.message);
-        else fetchPayments();
+        else {
+            fetchPayments();
+            setConfirmDeletePayment({ isOpen: false, paymentId: null, ownerName: '' });
+        }
     };
 
     const handleUploadDocument = async (e) => {
@@ -251,22 +291,32 @@ const Dashboard = () => {
         setUploading(false);
     };
 
-    const handleDeleteDocument = async (id, filePath) => {
-        if (!window.confirm('Delete this document?')) return;
+    const handleDeleteDocument = (id, filePath, docName) => {
+        setConfirmDeleteDocument({
+            isOpen: true,
+            documentId: id,
+            documentName: docName,
+            filePath: filePath
+        });
+    };
 
+    const executeDeleteDocument = async () => {
         const { error: storageError } = await supabase.storage
             .from('kondo_documents')
-            .remove([filePath]);
+            .remove([confirmDeleteDocument.filePath]);
 
         if (storageError) console.error('Error removing from storage:', storageError);
 
         const { error: dbError } = await supabase
             .from('kondo_documents')
             .delete()
-            .eq('id', id);
+            .eq('id', confirmDeleteDocument.documentId);
 
         if (dbError) alert('Error deleting document: ' + dbError.message);
-        else fetchDocuments();
+        else {
+            fetchDocuments();
+            setConfirmDeleteDocument({ isOpen: false, documentId: null, documentName: '', filePath: '' });
+        }
     };
 
     const handleDownloadDocument = async (filePath) => {
@@ -337,9 +387,12 @@ const Dashboard = () => {
                         {loading ? (
                             <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.loadingNotices')}</p>
                         ) : filteredNotices.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
-                                {debouncedSearch ? t('dashboard.noSearchResults') || 'No notices match your search' : t('dashboard.noNotices')}
-                            </p>
+                            <EmptyState 
+                                type="notices"
+                                compact={true}
+                                searchMode={!!debouncedSearch}
+                                message={debouncedSearch ? null : t('dashboard.noNotices')}
+                            />
                         ) : (
                             filteredNotices.slice(0, 4).map(notice => (
                                 <div key={notice.id} style={{
@@ -352,7 +405,7 @@ const Dashboard = () => {
                                 }}>
                                     {isAdmin && (
                                         <button
-                                            onClick={() => handleDeleteNotice(notice.id)}
+                                            onClick={() => handleDeleteNotice(notice.id, notice.title)}
                                             style={{
                                                 position: 'absolute',
                                                 top: '0.5rem',
@@ -386,7 +439,8 @@ const Dashboard = () => {
 
                 <Card title={t('dashboard.paymentControl')} viewAllLink="/payments">
                     <div className="table-wrapper">
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        {/* Desktop Table */}
+                        <table className="desktop-only" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid var(--glass-border)', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
                                     <th style={{ padding: '1rem 0.5rem' }}>{t('dashboard.table.owner')}</th>
@@ -400,9 +454,16 @@ const Dashboard = () => {
                                 {loading ? (
                                     <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>{t('dashboard.loadingPayments')}</td></tr>
                                 ) : filteredPayments.length === 0 ? (
-                                    <tr><td colSpan={isAdmin ? 5 : 4} style={{ textAlign: 'center', padding: '1rem' }}>
-                                        {debouncedSearch ? t('dashboard.noSearchResults') || 'No payments match your search' : t('dashboard.noPayments')}
-                                    </td></tr>
+                                    <tr>
+                                        <td colSpan={isAdmin ? 5 : 4} style={{ padding: '1rem 0' }}>
+                                            <EmptyState 
+                                                type="payments"
+                                                compact={true}
+                                                searchMode={!!debouncedSearch}
+                                                message={debouncedSearch ? null : t('dashboard.noPayments')}
+                                            />
+                                        </td>
+                                    </tr>
                                 ) : (
                                     filteredPayments.slice(0, 4).map((p) => (
                                         <tr key={p.id} style={{ borderBottom: '1px solid var(--glass-border)', fontSize: '0.9rem' }}>
@@ -429,7 +490,7 @@ const Dashboard = () => {
                                             {isAdmin && (
                                                 <td style={{ padding: '1rem 0.5rem' }}>
                                                     <button
-                                                        onClick={() => handleDeletePayment(p.id)}
+                                                        onClick={() => handleDeletePayment(p.id, p.owner_name)}
                                                         className="icon-btn danger"
                                                         title="Delete record"
                                                     >
@@ -444,6 +505,82 @@ const Dashboard = () => {
                                 )}
                             </tbody>
                         </table>
+
+                        {/* Mobile Cards View */}
+                        <div className="mobile-only mobile-cards" style={{ marginTop: '0.5rem' }}>
+                            {loading ? (
+                                <p style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-secondary)' }}>{t('dashboard.loadingPayments')}</p>
+                            ) : filteredPayments.length === 0 ? (
+                                <EmptyState 
+                                    type="payments"
+                                    compact={true}
+                                    searchMode={!!debouncedSearch}
+                                    message={debouncedSearch ? null : t('dashboard.noPayments')}
+                                />
+                            ) : (
+                                filteredPayments.slice(0, 4).map((p) => (
+                                    <div key={p.id} className="mobile-card-item" style={{ padding: '0.875rem' }}>
+                                        <div className="mobile-card-row" style={{ padding: '0.5rem 0' }}>
+                                            <span className="mobile-card-label">{t('dashboard.table.owner')}</span>
+                                            <span className="mobile-card-value owner">{p.owner_name}</span>
+                                        </div>
+                                        <div className="mobile-card-row" style={{ padding: '0.5rem 0' }}>
+                                            <span className="mobile-card-label">{t('dashboard.table.unit')}</span>
+                                            <span className="mobile-card-value">{p.unit}</span>
+                                        </div>
+                                        <div className="mobile-card-row" style={{ padding: '0.5rem 0' }}>
+                                            <span className="mobile-card-label">{t('dashboard.table.month')}</span>
+                                            <span className="mobile-card-value">{p.month}</span>
+                                        </div>
+                                        <div className="mobile-card-row" style={{ padding: '0.5rem 0', borderBottom: 'none' }}>
+                                            <span className="mobile-card-label">{t('dashboard.table.status')}</span>
+                                            <span className="mobile-card-value">
+                                                <span
+                                                    onClick={() => isAdmin && handleTogglePaymentStatus(p.id, p.status)}
+                                                    className="status-badge"
+                                                    style={{
+                                                        padding: '0.3rem 0.75rem',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: '600',
+                                                        background: p.status === 'Paid' ? 'var(--success-bg)' : 'var(--pending-bg)',
+                                                        color: p.status === 'Paid' ? 'var(--success-text)' : 'var(--pending-text)',
+                                                        border: p.status === 'Paid' ? '1px solid #bbf7d0' : '1px solid #fef08a',
+                                                        cursor: isAdmin ? 'pointer' : 'default',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '0.375rem'
+                                                    }}
+                                                >
+                                                    <span style={{
+                                                        width: '5px',
+                                                        height: '5px',
+                                                        borderRadius: '50%',
+                                                        background: p.status === 'Paid' ? 'var(--success-text)' : 'var(--pending-text)',
+                                                        display: 'inline-block'
+                                                    }} />
+                                                    {p.status}
+                                                </span>
+                                            </span>
+                                        </div>
+                                        {isAdmin && (
+                                            <div className="mobile-card-actions" style={{ marginTop: '0.75rem', paddingTop: '0.75rem' }}>
+                                                <button
+                                                    onClick={() => handleDeletePayment(p.id, p.owner_name)}
+                                                    className="icon-btn danger"
+                                                    title="Delete record"
+                                                    style={{ minWidth: '40px', minHeight: '40px' }}
+                                                >
+                                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                     {isAdmin && (
                         <button onClick={() => setShowPaymentModal(true)} className="btn-primary" style={{ width: '100%', marginTop: '1rem', padding: '0.6rem' }}>
@@ -478,9 +615,12 @@ const Dashboard = () => {
                         {loading ? (
                             <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('dashboard.loadingDocuments')}</p>
                         ) : filteredDocuments.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>
-                                {debouncedSearch ? t('dashboard.noSearchResults') || 'No documents match your search' : t('dashboard.noDocuments')}
-                            </p>
+                            <EmptyState 
+                                type="documents"
+                                compact={true}
+                                searchMode={!!debouncedSearch}
+                                message={debouncedSearch ? null : t('dashboard.noDocuments')}
+                            />
                         ) : (
                             filteredDocuments.slice(0, 4).map((doc) => (
                                 <div key={doc.id} style={{
@@ -510,7 +650,7 @@ const Dashboard = () => {
                                         </button>
                                         {isAdmin && (
                                             <button
-                                                onClick={() => handleDeleteDocument(doc.id, doc.file_path)}
+                                                onClick={() => handleDeleteDocument(doc.id, doc.file_path, doc.name)}
                                                 className="icon-btn danger"
                                                 title="Delete Document"
                                             >
@@ -604,6 +744,46 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+
+            {/* Confirm Dialogs */}
+            <ConfirmDialog
+                isOpen={confirmDeleteNotice.isOpen}
+                onClose={() => setConfirmDeleteNotice({ isOpen: false, noticeId: null, noticeTitle: '' })}
+                onConfirm={executeDeleteNotice}
+                type="danger"
+                title={t('confirmDialog.danger.title')}
+                message={confirmDeleteNotice.noticeTitle 
+                    ? `${t('noticesPage.deleteConfirm')} "${confirmDeleteNotice.noticeTitle}"?`
+                    : t('confirmDialog.danger.message')
+                }
+                confirmLabel={t('confirmDialog.danger.confirm')}
+            />
+
+            <ConfirmDialog
+                isOpen={confirmDeletePayment.isOpen}
+                onClose={() => setConfirmDeletePayment({ isOpen: false, paymentId: null, ownerName: '' })}
+                onConfirm={executeDeletePayment}
+                type="danger"
+                title={t('confirmDialog.danger.title')}
+                message={confirmDeletePayment.ownerName
+                    ? `${t('paymentsPage.deleteConfirm')} ${t('payments.table.owner')}: "${confirmDeletePayment.ownerName}"?`
+                    : t('confirmDialog.danger.message')
+                }
+                confirmLabel={t('confirmDialog.danger.confirm')}
+            />
+
+            <ConfirmDialog
+                isOpen={confirmDeleteDocument.isOpen}
+                onClose={() => setConfirmDeleteDocument({ isOpen: false, documentId: null, documentName: '', filePath: '' })}
+                onConfirm={executeDeleteDocument}
+                type="danger"
+                title={t('confirmDialog.danger.title')}
+                message={confirmDeleteDocument.documentName
+                    ? `${t('documentsPage.deleteConfirm')} "${confirmDeleteDocument.documentName}"?`
+                    : t('confirmDialog.danger.message')
+                }
+                confirmLabel={t('confirmDialog.danger.confirm')}
+            />
         </div>
     );
 };

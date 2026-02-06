@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import ConfirmDialog from './ConfirmDialog';
 
 const Navbar = () => {
     const { currentUser, logout, isAdmin } = useAuth();
@@ -9,6 +10,7 @@ const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     const links = [
         { to: '/', labelKey: 'nav.dashboard' },
@@ -23,14 +25,19 @@ const Navbar = () => {
         links.push({ to: '/users', labelKey: 'nav.users' });
     }
 
-    const handleLogout = async () => {
+    const handleLogoutClick = () => {
+        setShowLogoutConfirm(true);
+        setIsMenuOpen(false);
+    };
+
+    const handleConfirmLogout = async () => {
         try {
             await logout();
             navigate('/login');
         } catch (error) {
             console.error('Failed to log out', error);
         }
-        setIsMenuOpen(false);
+        setShowLogoutConfirm(false);
     };
 
     return (
@@ -78,13 +85,23 @@ const Navbar = () => {
                         {currentUser?.email?.substring(0, 2).toUpperCase()}
                     </div>
                     <button
-                        onClick={handleLogout}
+                        onClick={handleLogoutClick}
                         className="btn-logout"
                     >
                         {t('nav.signOut')}
                     </button>
                 </div>
             </div>
+
+            <ConfirmDialog
+                isOpen={showLogoutConfirm}
+                onClose={() => setShowLogoutConfirm(false)}
+                onConfirm={handleConfirmLogout}
+                type="logout"
+                title={t('confirmDialog.logout.title')}
+                message={t('confirmDialog.logout.message')}
+                confirmLabel={t('confirmDialog.logout.confirm')}
+            />
         </nav>
     );
 };

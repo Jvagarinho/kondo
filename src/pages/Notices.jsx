@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
+import EmptyState from '../components/EmptyState';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const Notices = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
@@ -11,6 +13,13 @@ const Notices = () => {
     const [loading, setLoading] = useState(true);
     const [showNoticeModal, setShowNoticeModal] = useState(false);
     const [newNotice, setNewNotice] = useState({ title: '', content: '', urgent: false });
+    
+    // Confirm Dialog state
+    const [confirmDialog, setConfirmDialog] = useState({
+        isOpen: false,
+        noticeId: null,
+        noticeTitle: ''
+    });
 
     const fetchNotices = useCallback(async () => {
         setLoading(true);
@@ -52,11 +61,21 @@ const Notices = () => {
         }
     };
 
-    const handleDeleteNotice = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this notice?')) return;
-        const { error } = await supabase.from('kondo_notices').delete().eq('id', id);
+    const handleDeleteNotice = (id, title) => {
+        setConfirmDialog({
+            isOpen: true,
+            noticeId: id,
+            noticeTitle: title
+        });
+    };
+
+    const confirmDeleteNotice = async () => {
+        const { error } = await supabase.from('kondo_notices').delete().eq('id', confirmDialog.noticeId);
         if (error) alert('Error deleting notice: ' + error.message);
-        else fetchNotices();
+        else {
+            fetchNotices();
+            setConfirmDialog({ isOpen: false, noticeId: null, noticeTitle: '' });
+        }
     };
 
     return (
@@ -78,7 +97,11 @@ const Notices = () => {
                         {loading ? (
                             <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('notices.loading')}</p>
                         ) : notices.length === 0 ? (
-                            <p style={{ color: 'var(--text-secondary)', textAlign: 'center' }}>{t('notices.empty')}</p>
+                            <EmptyState 
+                                type="notices" 
+                                actionLabel={isAdmin ? t('notices.newAlertButton') : null}
+                                onAction={isAdmin ? () => setShowNoticeModal(true) : null}
+                            />
                         ) : (
                             notices.map(notice => (
                                 <div key={notice.id} className="notice-item" style={{
@@ -87,7 +110,7 @@ const Notices = () => {
                                 }}>
                                     {isAdmin && (
                                         <button
-                                            onClick={() => handleDeleteNotice(notice.id)}
+                                            onClick={() => handleDeleteNotice(notice.id, notice.title)}
                                             style={{
                                                 position: 'absolute',
                                                 top: '1rem',
@@ -152,6 +175,19 @@ const Notices = () => {
                     </div>
                 </div>
             )}
+
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog({ isOpen: false, noticeId: null, noticeTitle: '' })}
+                onConfirm={confirmDeleteNotice}
+                type="danger"
+                title={t('confirmDialog.danger.title')}
+                message={confirmDialog.noticeTitle 
+                    ? `${t('noticesPage.deleteConfirm')} "${confirmDialog.noticeTitle}"?`
+                    : t('confirmDialog.danger.message')
+                }
+                confirmLabel={t('confirmDialog.danger.confirm')}
+            />
         </div>
     );
 };
