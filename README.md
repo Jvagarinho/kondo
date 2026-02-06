@@ -1,10 +1,87 @@
-# Kondo
+- Kondo Dashboard
 
-Kondo is a React-based admin dashboard focused on UX, accessibility and modern visuals. This project has reached Fase 3: UX Essenciais, with a strong emphasis on delightful interactions, responsive design and robust form/file handling flows.
+Kondo is a React based admin dashboard focused on UX, accessibility and modern visuals. This project has reached Fase 3: UX Essenciais, with strong focus on interactions, mobile first design and robust form and file handling flows.
 
 Status: Fase 3 - UX Essenciais
 
-What’s inside this repo:
+O que esta repo contem
+- UI rica com Framer Motion para animacoes e glassmorphism
+- Empty States com ilustracoes SVG amigaveis
+- Drag and Drop Upload (multi file) para documentos com progresso em tempo real e previews
+- Validacao de formularios com visuais modernos (Zod)
+- Dialogos de Confirmacao com modais animados
+- Layout responsivo orientado a dispositivos moveis (cards em listas, targets de toque)
+- Notificacoes com Toasts (React Toastify)
+- Suporte a internacionalizacao (PT/EN) via LanguageContext
+- Controlo de acesso via UI baseado em papeis (admins apenas para upload/apagar)
+- Recurso de reservas de acessos e logs basicos para auditoria
+
+Principais arquivos e componentes
+- DropZoneAdvanced.jsx: uploader avancado e multi-file
+- Documents.jsx: pagina de documentos atualizada para usar DropZoneAdvanced
+- ConfirmDialog.jsx: modal de confirmacao com animacao
+- EmptyState.jsx: componentes visuais para estados vazios
+- LanguageContext.jsx: i18n e traducoes
+- src/supabase (back-end): politica de acesso via Row Level Security (RLS) em kondo_documents
+
+Arquitetura e estrutura
+- src/components: DropZoneAdvanced, ConfirmDialog, EmptyState, FormInput, FormSelect, etc.
+- src/pages: Dashboard, Notices, Payments, Documents, Notices, etc.
+- src/contexts: LanguageContext, AuthContext, etc.
+- migrations: SQL de migracoes, incluindo regras de acesso (RLS)
+- index.css: CSS global com tema glassmorphism, responsivo e utilitarios
+
+Recursos-chave Implementados
+- Drag & Drop Upload multi-file com previews e progresso
+- Form Validation Visual com feedback responsivo
+- Dialogos de Confirmacao com animacoes
+- Empty States com ilustracoes amigaveis
+- Mobile-first e responsivo
+- Acessibilidade basica (keyboard, foco, ARIA)
+- Localizacao PT/EN
+- Gatilhos de notificacoes (toasts)
+
+Configuracao Local
+- Pre requisitos: Node.js (>= 18), npm (ou yarn)
+- Clonar o repositorio e instalar dependencias:
+  npm install
+- Configurar variaveis de ambiente (exemplos):
+  - VITE_SUPABASE_URL
+  - VITE_SUPABASE_ANON_KEY
+- Iniciar modo de desenvolvimento:
+  npm run dev
+- Construir para producao:
+  npm run build
+- Verificar lint: npm run lint
+
+Estrutura de Arquivos (resumo)
+- src/components/DropZoneAdvanced.jsx   -> Uploader avancado com drag & drop e multi-file
+- src/pages/Documents.jsx               -> integra DropZoneAdvanced para upload de documentos
+- src/contexts/LanguageContext.jsx        -> i18n PT/EN
+- migrations/rls_kondo_documents_v2.sql   -> migração de RLS (admin-only uploads/deletes)
+- README.md                              -> este documento
+- index.css                               -> estilos globais (glassmorphism, responsivo)
+- etc. (ver pastas)                       
+
+Uso de backend e seguranca
+- O front-end ja restringe a UI para admins, mas a protecao real vem das regras de acesso no back-end.
+- Regras de Row Level Security (RLS) ficaram ativas para a tabela de documentos (kondo_documents).
+- Policies (INSERIR/DELETE) implementadas para admin ou owner conforme o esquema escolhido (com ou sem claims JWT).
+- Recomenda-se validar com seu time de dados para alinhar nomes de tabelas e colunas de usuarios.
+
+Notas de contribuicao
+- The repo utiliza um fluxo de commits cuidadoso: enfrente cambios usuarios com commit messages descritivos.
+- Pode abrir issues para novas features e PRs para validações extensivas.
+
+Roadmap (próximos passos)
+- Melhorias de UX: toast feedback por arquivo, resumo de uploads, re-upload de falhas
+- Tests automatizados básicos para fluxo de upload
+- Suporte a PWA e offline
+- Conteudos + dashboards adicionais e visualizações
+
+Licenca: MIT (ou atual)?
+
+Obrigado por usar o Kondo. Se precisar ajustar algum trecho ou idioma, avise e atualizo rapidamente.
 - Rich UI with Framer Motion animations and glassmorphism styling
 - Empty States with friendly SVG illustrations
 - Drag & Drop Upload (multi-file) for documents with real-time progress and previews
