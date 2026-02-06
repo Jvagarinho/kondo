@@ -117,6 +117,12 @@ Files of note:
 - Build for production: `npm run build`
 - Lint: `npm run lint`
 
+-## Security Best Practices (quick)
+- Public repositories should avoid exposing secrets. This project uses environment variables for credentials (eg. Supabase URL/anon key). Ensure these are never committed.
+- Add a .env.example with placeholders (already added).
+- Add a .gitignore rule to ignore real .env files (already added).
+- If secrets were ever committed, rotate them and purge history if necessary.
+
 ## Testing (manual)
 - Drag & drop tests on Documents page using admin account
 - Validate that non-admin users cannot upload or delete documents (backend/permissions must be enforced)
