@@ -285,40 +285,31 @@ const Dashboard = () => {
         <div className="app-container" style={{ paddingBottom: '4rem' }}>
             <Navbar />
 
-            <section className="dashboard-header">
-                <h1 style={{ fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
-                    {t('dashboard.welcome')}, {currentUser?.user_metadata?.name || currentUser?.email}
-                </h1>
-                <p style={{ fontSize: '0.95rem', color: 'var(--text-on-highlight)', fontWeight: '500' }}>
-                    {t('dashboard.subtitle')}
-                </p>
-            </section>
-
-            {/* Search Section - Destacada */}
-            <section style={{ 
+            {/* Header com Search lado a lado */}
+            <section style={{
                 padding: '1.5rem 2rem',
                 display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '2rem',
+                flexWrap: 'wrap'
             }}>
-                <div style={{
-                    background: 'rgba(255, 255, 255, 0.6)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '16px',
-                    padding: '1.5rem 2rem',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-                    border: '1px solid rgba(255, 255, 255, 0.5)',
-                    width: '100%',
-                    maxWidth: '700px'
-                }}>
-                    <p style={{ 
-                        fontSize: '0.9rem', 
-                        color: 'var(--text-secondary)', 
-                        marginBottom: '0.75rem',
-                        textAlign: 'center'
-                    }}>
-                        {t('dashboard.searchTitle') || 'Search across all content'}
+                {/* Welcome Text */}
+                <div style={{ flex: '1', minWidth: '300px' }}>
+                    <h1 style={{ fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
+                        {t('dashboard.welcome')}, {currentUser?.user_metadata?.name || currentUser?.email}
+                    </h1>
+                    <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', fontWeight: '500' }}>
+                        {t('dashboard.subtitle')}
                     </p>
+                </div>
+
+                {/* Search Bar */}
+                <div style={{ 
+                    flex: '0 0 auto',
+                    minWidth: '320px'
+                }}>
                     <ElegantSearchBar 
                         placeholder={t('dashboard.searchPlaceholder') || 'Search notices, payments, documents...'}
                         onSearch={setSearchQuery}
