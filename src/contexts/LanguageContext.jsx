@@ -168,7 +168,22 @@ export const translations = {
 
         // Table
         'table.noData': 'No data available',
-        'table.actions': 'Actions'
+        'table.actions': 'Actions',
+
+        // Upload
+        'upload.dragDrop': 'Drag and drop files here',
+        'upload.dropHere': 'Drop files here!',
+        'upload.orClick': 'or click to browse',
+        'upload.maxSize': 'Max {size}',
+        'upload.selectedFiles': 'Selected files',
+        'upload.upload': 'Upload',
+        'upload.uploading': 'Uploading...',
+        'upload.completed': 'Completed!',
+        'upload.remove': 'Remove file',
+        'upload.error.size': 'File "{name}" exceeds max size of {size}',
+        'upload.error.type': 'File "{name}" has invalid type',
+        'upload.error.maxFiles': 'Maximum {max} files allowed',
+        'upload.error.generic': 'Error uploading files. Please try again.'
     },
     pt: {
         'nav.dashboard': 'Painel',
@@ -337,7 +352,22 @@ export const translations = {
 
         // Table
         'table.noData': 'Não existem dados',
-        'table.actions': 'Ações'
+        'table.actions': 'Ações',
+
+        // Upload
+        'upload.dragDrop': 'Arraste e solte ficheiros aqui',
+        'upload.dropHere': 'Solte os ficheiros aqui!',
+        'upload.orClick': 'ou clique para procurar',
+        'upload.maxSize': 'Máx {size}',
+        'upload.selectedFiles': 'Ficheiros selecionados',
+        'upload.upload': 'Carregar',
+        'upload.uploading': 'A carregar...',
+        'upload.completed': 'Concluído!',
+        'upload.remove': 'Remover ficheiro',
+        'upload.error.size': 'O ficheiro "{name}" excede o tamanho máximo de {size}',
+        'upload.error.type': 'O ficheiro "{name}" tem um tipo inválido',
+        'upload.error.maxFiles': 'Máximo de {max} ficheiros permitidos',
+        'upload.error.generic': 'Erro ao carregar ficheiros. Por favor tente novamente.'
     }
 };
 

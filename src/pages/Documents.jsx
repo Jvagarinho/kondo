@@ -4,14 +4,15 @@ import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
 import EmptyState from '../components/EmptyState';
+import DropZoneAdvanced from '../components/DropZoneAdvanced';
 import ConfirmDialog from '../components/ConfirmDialog';
+import DropZone from '../components/DropZone';
 
 const Documents = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
     const { t } = useLanguage();
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [uploading, setUploading] = useState(false);
     
     // Confirm Dialog state
     const [confirmDialog, setConfirmDialog] = useState({
@@ -40,24 +41,15 @@ const Documents = () => {
         fetchDocuments();
     }, [fetchDocuments]);
 
-    const handleUploadDocument = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        setUploading(true);
+    const handleUploadDocument = async (file, { signal } = {}) => {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
+        const fileName = `${Date.now()}_${Math.random().toString(36).slice(2,6)}.${fileExt}`;
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
             .from('kondo_documents')
-            .upload(filePath, file);
-
-        if (uploadError) {
-            alert('Error uploading file: ' + uploadError.message);
-            setUploading(false);
-            return;
-        }
+            .upload(filePath, file, { signal });
+        if (uploadError) throw uploadError;
 
         const payload = {
             name: file.name,
@@ -73,11 +65,10 @@ const Documents = () => {
             .insert([payload]);
 
         if (dbError) {
-            alert('Error saving document info: ' + dbError.message);
-        } else {
-            fetchDocuments();
+            throw new Error('Error saving document info: ' + dbError.message);
         }
-        setUploading(false);
+        
+        fetchDocuments();
     };
 
     const handleDeleteDocument = (id, filePath, docName) => {
@@ -125,24 +116,14 @@ const Documents = () => {
                 <div className="premium-card fade-in">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                         <h2 style={{ fontSize: '1.75rem', fontWeight: '700' }}>{t('documents.title')}</h2>
-                        {isAdmin && (
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <input
-                                    type="file"
-                                    id="page-doc-upload"
-                                    style={{ display: 'none' }}
-                                    onChange={handleUploadDocument}
-                                />
-                                <button
-                                    onClick={() => document.getElementById('page-doc-upload').click()}
-                                    className="btn-primary"
-                                    disabled={uploading}
-                                >
-                                    {uploading ? 'Uploading...' : t('documents.uploadButton')}
-                                </button>
-                            </div>
-                        )}
                     </div>
+
+                    {/* Drag and Drop Upload Zone - Apenas para Admin */}
+                    {isAdmin && (
+                        <div style={{ marginBottom: '2rem' }}>
+                            <DropZoneAdvanced onUpload={handleUploadDocument} acceptedTypes={['application/pdf', 'image/*', '.doc', '.docx', '.xls', '.xlsx', '.txt']} maxSize={10 * 1024 * 1024} maxFiles={5} multiple={true} />
+                        </div>
+                    )}
 
                     <div className="documents-grid">
                         {loading ? (
@@ -151,8 +132,6 @@ const Documents = () => {
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <EmptyState 
                                     type="documents" 
-                                    actionLabel={isAdmin ? t('documents.uploadButton') : null}
-                                    onAction={isAdmin ? () => document.getElementById('page-doc-upload').click() : null}
                                 />
                             </div>
                         ) : (
