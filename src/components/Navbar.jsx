@@ -73,19 +73,8 @@ const Navbar = () => {
                     {t('nav.languageToggle')}
                 </button>
 
-                <div className="flex items-center gap-2">
-                    <div style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '50%',
-                        background: 'var(--accent-glow)',
-                        color: 'var(--accent-color)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: '600',
-                        fontSize: '0.85rem'
-                    }}>
+                <div className="navbar-user-section">
+                    <div className="user-avatar">
                         {currentUser?.email?.substring(0, 2).toUpperCase()}
                     </div>
                     <button
