@@ -8,6 +8,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import ElegantSearchBar from '../components/ui/ElegantSearchBar';
 import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ConfirmDialog';
+import Footer from '../components/Footer';
 
 const Card = ({ title, children, action, viewAllLink }) => {
     const { t } = useLanguage();
@@ -784,6 +785,8 @@ const Dashboard = () => {
                 }
                 confirmLabel={t('confirmDialog.danger.confirm')}
             />
+            
+            <Footer />
         </div>
     );
 };

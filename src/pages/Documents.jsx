@@ -7,6 +7,7 @@ import EmptyState from '../components/EmptyState';
 import DropZoneAdvanced from '../components/DropZoneAdvanced';
 import ConfirmDialog from '../components/ConfirmDialog';
 import DropZone from '../components/DropZone';
+import Footer from '../components/Footer';
 
 const Documents = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
@@ -212,6 +213,8 @@ const Documents = () => {
                 }
                 confirmLabel={t('confirmDialog.danger.confirm')}
             />
+            
+            <Footer />
         </div>
     );
 };

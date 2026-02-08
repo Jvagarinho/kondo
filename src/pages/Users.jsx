@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
+import Footer from '../components/Footer';
 
 const Users = () => {
     const { isAdmin } = useAuth();
@@ -185,6 +186,8 @@ const Users = () => {
                     )}
                 </div>
             </main>
+            
+            <Footer />
         </div>
     );
 };

@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
 import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ConfirmDialog';
+import Footer from '../components/Footer';
 
 const Payments = () => {
     const { isAdmin, condominiumId } = useAuth();
@@ -353,6 +354,8 @@ const Payments = () => {
                 }
                 confirmLabel={t('confirmDialog.danger.confirm')}
             />
+            
+            <Footer />
         </div>
     );
 };

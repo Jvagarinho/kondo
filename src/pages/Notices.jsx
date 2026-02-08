@@ -6,6 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import EmptyState from '../components/EmptyState';
 import ConfirmDialog from '../components/ConfirmDialog';
 import FormInput from '../components/FormInput';
+import Footer from '../components/Footer';
 import FormTextArea from '../components/FormTextArea';
 import { noticeSchema } from '../lib/validation';
 import { useValidation } from '../hooks/useValidation';
@@ -240,6 +241,8 @@ const Notices = () => {
                 }
                 confirmLabel={t('confirmDialog.danger.confirm')}
             />
+            
+            <Footer />
         </div>
     );
 };

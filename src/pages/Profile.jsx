@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
+import Footer from '../components/Footer';
 
 const Profile = () => {
     const { currentUser, condominiumId } = useAuth();
@@ -212,6 +213,8 @@ const Profile = () => {
                     )}
                 </div>
             </main>
+            
+            <Footer />
         </div>
     );
 };
