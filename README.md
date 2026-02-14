@@ -1,6 +1,6 @@
 - Kondo Dashboard
 
-Kondo is a React based admin dashboard focused on UX, accessibility and modern visuals. This project has reached Fase 3: UX Essenciais, with strong focus on interactions, mobile first design and robust form and file handling flows.
+Kondo is a React based admin dashboard focused on UX, accessibility and modern visuals. This project has strong focus on interactions, mobile first design and robust form and file handling flows.
 
 Status: Fase 3 - UX Essenciais
 
@@ -143,17 +143,6 @@ Files of note:
 - This repo is actively maintained; contributions are welcome.
 - Please open issues for feature requests or bug reports and submit PRs with tests where possible.
 
-## Notas de segurança
-- O front-end já restringe UI para admins, mas é essencial manter as políticas de back-end (RLS) ativas para qualquer operação via API.
-- As políticas podem ser ajustadas para o seu esquema real (colunas/nomes de tabelas). 
-
-## Próximos passos
-- Adicionar toasts por arquivo (feedback imediato de sucesso/erro)
-- Implementar resumo de uploads ao final
-- Adicionar testes automatizados simples para fluxo de upload
-- Melhorar mensagens de erro com códigos HTTP bem entendidos
-
-Feito com foco em UX, performance e segurança. Se quiser, posso adaptar o README a outro estilo ou incluir capturas de tela.
 
 Links úteis
 - Repositório: https://github.com/Jvagarinho/kondo
