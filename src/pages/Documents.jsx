@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDemo } from '../contexts/DemoContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,6 +12,7 @@ import Footer from '../components/Footer';
 
 const Documents = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
+    const { isDemoMode, getDemoSupabase, demoData } = useDemo();
     const { t } = useLanguage();
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,6 +27,11 @@ const Documents = () => {
 
     const fetchDocuments = useCallback(async () => {
         setLoading(true);
+        if (isDemoMode) {
+            setDocuments(demoData.documents);
+            setLoading(false);
+            return;
+        }
         let query = supabase
             .from('kondo_documents')
             .select('*')
@@ -36,13 +43,34 @@ const Documents = () => {
         if (error) console.error('Error fetching documents:', error);
         else setDocuments(data || []);
         setLoading(false);
-    }, [condominiumId]);
+    }, [condominiumId, isDemoMode, demoData.documents]);
 
     useEffect(() => {
         fetchDocuments();
     }, [fetchDocuments]);
 
     const handleUploadDocument = async (file, { signal } = {}) => {
+        // Em modo demo, simula o upload sem enviar ao servidor
+        if (isDemoMode) {
+            const mockDoc = {
+                name: file.name,
+                file_path: `demo-${Date.now()}.pdf`,
+                uploaded_by: currentUser.id,
+                file_type: file.type,
+                file_size: file.size
+            };
+            if (condominiumId) {
+                mockDoc.condominium_id = condominiumId;
+            }
+
+            const { error: dbError } = getDemoSupabase('kondo_documents').insert(mockDoc).select().single();
+            if (dbError) {
+                throw new Error('Error saving document info: ' + dbError.message);
+            }
+            fetchDocuments();
+            return;
+        }
+
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).slice(2,6)}.${fileExt}`;
         const filePath = `${fileName}`;
@@ -68,7 +96,7 @@ const Documents = () => {
         if (dbError) {
             throw new Error('Error saving document info: ' + dbError.message);
         }
-        
+
         fetchDocuments();
     };
 
@@ -82,6 +110,17 @@ const Documents = () => {
     };
 
     const confirmDeleteDocument = async () => {
+        if (isDemoMode) {
+            const { error: dbError } = getDemoSupabase('kondo_documents').delete().eq('id', confirmDialog.documentId);
+
+            if (dbError) alert('Error deleting document: ' + dbError.message);
+            else {
+                fetchDocuments();
+                setConfirmDialog({ isOpen: false, documentId: null, documentName: '', filePath: '' });
+            }
+            return;
+        }
+
         const { error: storageError } = await supabase.storage
             .from('kondo_documents')
             .remove([confirmDialog.filePath]);
@@ -101,6 +140,12 @@ const Documents = () => {
     };
 
     const handleDownloadDocument = async (filePath) => {
+        // Em modo demo, apenas mostra um alerta informativo
+        if (isDemoMode) {
+            alert('Modo Demo: Download simulado. Em produção, o arquivo seria baixado aqui.');
+            return;
+        }
+
         const { data, error } = await supabase.storage
             .from('kondo_documents')
             .createSignedUrl(filePath, 60);

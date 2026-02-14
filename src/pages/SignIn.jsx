@@ -68,6 +68,22 @@ const SignIn = () => {
     return (
         <div className="auth-layout">
             <div className="premium-card fade-in auth-card">
+                {/* Logo */}
+                <div style={{ 
+                    textAlign: 'center', 
+                    marginBottom: '1.5rem' 
+                }}>
+                    <img 
+                        src="/logo.png" 
+                        alt="Kondo Logo" 
+                        style={{ 
+                            width: '120px', 
+                            height: 'auto',
+                            maxWidth: '100%'
+                        }} 
+                    />
+                </div>
+                
                 <h2 style={{ textAlign: 'center', marginBottom: '2rem', fontSize: '1.75rem', color: 'var(--accent-color)' }}>
                     {t('auth.signIn.title')}
                 </h2>

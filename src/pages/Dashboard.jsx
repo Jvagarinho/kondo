@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useDemo } from '../contexts/DemoContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -32,6 +33,7 @@ const Card = ({ title, children, action, viewAllLink }) => {
 
 const Dashboard = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
+    const { isDemoMode, getDemoSupabase, demoData } = useDemo();
     const { t } = useLanguage();
     const [notices, setNotices] = useState([]);
     const [payments, setPayments] = useState([]);
@@ -73,6 +75,10 @@ const Dashboard = () => {
     });
 
     const fetchNotices = useCallback(async () => {
+        if (isDemoMode) {
+            setNotices(demoData.notices);
+            return;
+        }
         let query = supabase
             .from('kondo_notices')
             .select('*')
@@ -83,9 +89,13 @@ const Dashboard = () => {
         const { data, error } = await query;
         if (error) console.error('Error fetching notices:', error);
         else setNotices(data);
-    }, [condominiumId]);
+    }, [condominiumId, isDemoMode, demoData.notices]);
 
     const fetchPayments = useCallback(async () => {
+        if (isDemoMode) {
+            setPayments(demoData.payments);
+            return;
+        }
         let query = supabase
             .from('kondo_payments')
             .select('*')
@@ -96,9 +106,13 @@ const Dashboard = () => {
         const { data, error } = await query;
         if (error) console.error('Error fetching payments:', error);
         else setPayments(data);
-    }, [condominiumId]);
+    }, [condominiumId, isDemoMode, demoData.payments]);
 
     const fetchDocuments = useCallback(async () => {
+        if (isDemoMode) {
+            setDocuments(demoData.documents);
+            return;
+        }
         let query = supabase
             .from('kondo_documents')
             .select('*')
@@ -109,9 +123,13 @@ const Dashboard = () => {
         const { data, error } = await query;
         if (error) console.error('Error fetching documents:', error);
         else setDocuments(data || []);
-    }, [condominiumId]);
+    }, [condominiumId, isDemoMode, demoData.documents]);
 
     const fetchUsers = useCallback(async () => {
+        if (isDemoMode) {
+            setUsers(demoData.users);
+            return;
+        }
         let query = supabase
             .from('kondo_users')
             .select('id, name')
@@ -122,7 +140,7 @@ const Dashboard = () => {
         const { data, error } = await query;
         if (error) console.error('Error fetching users:', error);
         else setUsers(data);
-    }, [condominiumId]);
+    }, [condominiumId, isDemoMode, demoData.users]);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -171,6 +189,18 @@ const Dashboard = () => {
         if (condominiumId) {
             payload.condominium_id = condominiumId;
         }
+        
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_notices').insert(payload).select().single();
+            if (error) alert('Error adding notice: ' + error.message);
+            else {
+                setShowNoticeModal(false);
+                setNewNotice({ title: '', content: '', urgent: false });
+                fetchNotices();
+            }
+            return;
+        }
+        
         const { error } = await supabase
             .from('kondo_notices')
             .insert([payload]);
@@ -192,6 +222,16 @@ const Dashboard = () => {
     };
 
     const executeDeleteNotice = async () => {
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_notices').delete().eq('id', confirmDeleteNotice.noticeId);
+            if (error) alert('Error deleting notice: ' + error.message);
+            else {
+                fetchNotices();
+                setConfirmDeleteNotice({ isOpen: false, noticeId: null, noticeTitle: '' });
+            }
+            return;
+        }
+
         const { error } = await supabase.from('kondo_notices').delete().eq('id', confirmDeleteNotice.noticeId);
         if (error) alert('Error deleting notice: ' + error.message);
         else {
@@ -211,6 +251,24 @@ const Dashboard = () => {
         if (condominiumId) {
             payload.condominium_id = condominiumId;
         }
+        
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_payments').insert(payload).select().single();
+            if (error) alert('Error adding payment: ' + error.message);
+            else {
+                setShowPaymentModal(false);
+                setNewPayment({
+                    owner_id: '',
+                    unit: '',
+                    amount: '',
+                    status: 'Pending',
+                    month: new Date().toISOString().slice(0, 7)
+                });
+                fetchPayments();
+            }
+            return;
+        }
+        
         const { error } = await supabase
             .from('kondo_payments')
             .insert([payload]);
@@ -231,6 +289,14 @@ const Dashboard = () => {
 
     const handleTogglePaymentStatus = async (id, currentStatus) => {
         const newStatus = currentStatus === 'Paid' ? 'Pending' : 'Paid';
+        
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_payments').update({ status: newStatus }).eq('id', id);
+            if (error) alert('Error updating status: ' + error.message);
+            else fetchPayments();
+            return;
+        }
+        
         const { error } = await supabase
             .from('kondo_payments')
             .update({ status: newStatus })
@@ -249,6 +315,16 @@ const Dashboard = () => {
     };
 
     const executeDeletePayment = async () => {
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_payments').delete().eq('id', confirmDeletePayment.paymentId);
+            if (error) alert('Error deleting payment: ' + error.message);
+            else {
+                fetchPayments();
+                setConfirmDeletePayment({ isOpen: false, paymentId: null, ownerName: '' });
+            }
+            return;
+        }
+
         const { error } = await supabase.from('kondo_payments').delete().eq('id', confirmDeletePayment.paymentId);
         if (error) alert('Error deleting payment: ' + error.message);
         else {
@@ -262,6 +338,27 @@ const Dashboard = () => {
         if (!file) return;
 
         setUploading(true);
+
+        // Em modo demo, simula o upload sem enviar ao servidor
+        if (isDemoMode) {
+            const mockDoc = {
+                name: file.name,
+                file_path: `demo-${Date.now()}.pdf`,
+                uploaded_by: currentUser.id,
+                file_type: file.type,
+                file_size: file.size
+            };
+            
+            const { error: dbError } = getDemoSupabase('kondo_documents').insert(mockDoc).select().single();
+            if (dbError) {
+                alert('Error saving document info: ' + dbError.message);
+            } else {
+                fetchDocuments();
+            }
+            setUploading(false);
+            return;
+        }
+
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
@@ -302,6 +399,17 @@ const Dashboard = () => {
     };
 
     const executeDeleteDocument = async () => {
+        if (isDemoMode) {
+            const { error: dbError } = getDemoSupabase('kondo_documents').delete().eq('id', confirmDeleteDocument.documentId);
+
+            if (dbError) alert('Error deleting document: ' + dbError.message);
+            else {
+                fetchDocuments();
+                setConfirmDeleteDocument({ isOpen: false, documentId: null, documentName: '', filePath: '' });
+            }
+            return;
+        }
+
         const { error: storageError } = await supabase.storage
             .from('kondo_documents')
             .remove([confirmDeleteDocument.filePath]);
@@ -321,6 +429,12 @@ const Dashboard = () => {
     };
 
     const handleDownloadDocument = async (filePath) => {
+        // Em modo demo, apenas mostra um alerta informativo
+        if (isDemoMode) {
+            alert('Modo Demo: Download simulado. Em produção, o arquivo seria baixado aqui.');
+            return;
+        }
+
         const { data, error } = await supabase.storage
             .from('kondo_documents')
             .createSignedUrl(filePath, 60);

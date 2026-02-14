@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDemo } from '../contexts/DemoContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,6 +10,7 @@ import Footer from '../components/Footer';
 
 const Payments = () => {
     const { isAdmin, condominiumId } = useAuth();
+    const { isDemoMode, getDemoSupabase, demoData } = useDemo();
     const { t } = useLanguage();
     const [payments, setPayments] = useState([]);
     const [users, setUsers] = useState([]);
@@ -30,6 +32,10 @@ const Payments = () => {
     });
 
     const fetchPayments = useCallback(async () => {
+        if (isDemoMode) {
+            setPayments(demoData.payments);
+            return;
+        }
         let query = supabase
             .from('kondo_payments')
             .select('*')
@@ -40,9 +46,13 @@ const Payments = () => {
         const { data, error } = await query;
         if (error) console.error('Error fetching payments:', error);
         else setPayments(data);
-    }, [condominiumId]);
+    }, [condominiumId, isDemoMode, demoData.payments]);
 
     const fetchUsers = useCallback(async () => {
+        if (isDemoMode) {
+            setUsers(demoData.users);
+            return;
+        }
         let query = supabase
             .from('kondo_users')
             .select('id, name')
@@ -53,7 +63,7 @@ const Payments = () => {
         const { data, error } = await query;
         if (error) console.error('Error fetching users:', error);
         else setUsers(data);
-    }, [condominiumId]);
+    }, [condominiumId, isDemoMode, demoData.users]);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -79,6 +89,24 @@ const Payments = () => {
         if (condominiumId) {
             payload.condominium_id = condominiumId;
         }
+
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_payments').insert(payload).select().single();
+            if (error) alert('Error adding payment: ' + error.message);
+            else {
+                setShowPaymentModal(false);
+                setNewPayment({
+                    owner_id: '',
+                    unit: '',
+                    amount: '',
+                    status: 'Pending',
+                    month: new Date().toISOString().slice(0, 7)
+                });
+                fetchPayments();
+            }
+            return;
+        }
+
         const { error } = await supabase
             .from('kondo_payments')
             .insert([payload]);
@@ -99,6 +127,14 @@ const Payments = () => {
 
     const handleTogglePaymentStatus = async (id, currentStatus) => {
         const newStatus = currentStatus === 'Paid' ? 'Pending' : 'Paid';
+
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_payments').update({ status: newStatus }).eq('id', id);
+            if (error) alert('Error updating status: ' + error.message);
+            else fetchPayments();
+            return;
+        }
+
         const { error } = await supabase
             .from('kondo_payments')
             .update({ status: newStatus })
@@ -117,6 +153,16 @@ const Payments = () => {
     };
 
     const confirmDeletePayment = async () => {
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_payments').delete().eq('id', confirmDialog.paymentId);
+            if (error) alert('Error deleting payment: ' + error.message);
+            else {
+                fetchPayments();
+                setConfirmDialog({ isOpen: false, paymentId: null, ownerName: '' });
+            }
+            return;
+        }
+
         const { error } = await supabase.from('kondo_payments').delete().eq('id', confirmDialog.paymentId);
         if (error) alert('Error deleting payment: ' + error.message);
         else {

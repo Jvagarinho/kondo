@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDemo } from '../contexts/DemoContext';
 import { supabase } from '../supabase';
 import Navbar from '../components/Navbar';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -13,6 +14,7 @@ import { useValidation } from '../hooks/useValidation';
 
 const Notices = () => {
     const { currentUser, isAdmin, condominiumId } = useAuth();
+    const { isDemoMode, getDemoSupabase, demoData } = useDemo();
     const { t } = useLanguage();
     const [notices, setNotices] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -34,6 +36,11 @@ const Notices = () => {
 
     const fetchNotices = useCallback(async () => {
         setLoading(true);
+        if (isDemoMode) {
+            setNotices(demoData.notices);
+            setLoading(false);
+            return;
+        }
         let query = supabase
             .from('kondo_notices')
             .select('*')
@@ -45,7 +52,7 @@ const Notices = () => {
         if (error) console.error('Error fetching notices:', error);
         else setNotices(data);
         setLoading(false);
-    }, [condominiumId]);
+    }, [condominiumId, isDemoMode, demoData.notices]);
 
     useEffect(() => {
         fetchNotices();
@@ -53,14 +60,14 @@ const Notices = () => {
 
     const handleAddNotice = async (e) => {
         e.preventDefault();
-        
+
         // Mark all fields as touched
         setTouchedFields({ title: true, content: true });
-        
+
         if (!validateAll()) {
             return;
         }
-        
+
         const payload = {
             ...newNotice,
             author_id: currentUser.id
@@ -68,6 +75,19 @@ const Notices = () => {
         if (condominiumId) {
             payload.condominium_id = condominiumId;
         }
+
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_notices').insert(payload).select().single();
+            if (error) alert('Error adding notice: ' + error.message);
+            else {
+                setShowNoticeModal(false);
+                reset();
+                setTouchedFields({});
+                fetchNotices();
+            }
+            return;
+        }
+
         const { error } = await supabase
             .from('kondo_notices')
             .insert([payload]);
@@ -105,6 +125,16 @@ const Notices = () => {
     };
 
     const confirmDeleteNotice = async () => {
+        if (isDemoMode) {
+            const { error } = getDemoSupabase('kondo_notices').delete().eq('id', confirmDialog.noticeId);
+            if (error) alert('Error deleting notice: ' + error.message);
+            else {
+                fetchNotices();
+                setConfirmDialog({ isOpen: false, noticeId: null, noticeTitle: '' });
+            }
+            return;
+        }
+
         const { error } = await supabase.from('kondo_notices').delete().eq('id', confirmDialog.noticeId);
         if (error) alert('Error deleting notice: ' + error.message);
         else {

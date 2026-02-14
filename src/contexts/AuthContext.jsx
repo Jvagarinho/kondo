@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../supabase';
+import { useDemo } from './DemoContext.jsx';
 
 const AuthContext = createContext();
 
@@ -8,6 +9,7 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
+    const { isDemoMode, demoAuth, demoData } = useDemo();
     const [currentUser, setCurrentUser] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [condominiumId, setCondominiumId] = useState(null);
@@ -47,6 +49,18 @@ export function AuthProvider({ children }) {
     }
 
     useEffect(() => {
+        // Se estiver em modo demo, configura o usuário fictício
+        if (isDemoMode) {
+            demoAuth(true).getSession().then(({ data }) => {
+                const user = data.session.user;
+                setCurrentUser(user);
+                setIsAdmin(true);
+                setCondominiumId(user.user_metadata.condominium_id);
+                setLoading(false);
+            });
+            return;
+        }
+
         // Initial session check
         supabase.auth.getSession().then(({ data: { session } }) => {
             handleAuthStateChange(session?.user ?? null);
@@ -88,8 +102,8 @@ export function AuthProvider({ children }) {
             setLoading(false);
         }
 
-        return () => subscription.unsubscribe();
-    }, []);
+        return () => subscription?.unsubscribe();
+    }, [isDemoMode, demoAuth, demoData]);
 
     const value = {
         currentUser,
