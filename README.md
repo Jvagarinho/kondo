@@ -1,134 +1,134 @@
 # 🏢 Kondo
 
-**Sistema de Gestão de Condomínios Moderno e Intuitivo**
+**Modern and Intuitive Condominium Management System**
 
 [![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-7-purple)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-2.0-green)](https://supabase.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Kondo é uma aplicação web completa para gestão de condomínios, desenvolvida com foco em usabilidade, design moderno e experiência do usuário. Centraliza documentos, controlo de pagamentos e comunicação entre administração e moradores.
+Kondo is a complete web application for condominium management, developed with a focus on usability, modern design, and user experience. It centralizes documents, payment control, and communication between management and residents.
 
 ![Kondo Preview](https://via.placeholder.com/800x400/1e3a5f/ffffff?text=Kondo+Dashboard)
 
 ---
 
-## ✨ Funcionalidades
+## ✨ Features
 
-### 📋 Gestão de Comunicados
-- Criação e visualização de avisos e alertas
-- Marcação de comunicados urgentes
-- Histórico completo de notificações
-- Interface responsiva com cards animados
+### 📋 Notice Management
+- Create and view announcements and alerts
+- Mark urgent notices
+- Complete notification history
+- Responsive interface with animated cards
 
-### 💰 Controlo de Pagamentos
-- Registo e acompanhamento de pagamentos mensais
-- Status visual: Pago, Pendente, Atrasado
-- Filtros e pesquisa avançada
-- Gestão por unidade/fractura
+### 💰 Payment Control
+- Record and track monthly payments
+- Visual status: Paid, Pending, Overdue
+- Advanced filters and search
+- Management by unit/fraction
 
-### 📁 Repositório de Documentos
-- Upload multiplo com drag & drop
-- Previews e progresso em tempo real
-- Organização por data e tipo
-- Download seguro de arquivos
-- Controlo de acesso baseado em permissões
+### 📁 Document Repository
+- Multiple file upload with drag & drop
+- Real-time previews and progress
+- Organization by date and type
+- Secure file downloads
+- Permission-based access control
 
-### 👥 Gestão de Utilizadores
-- Perfis de Admin e Morador
-- Atribuição de unidades/fracturas
-- Dados pessoais e contactos
-- Sistema de autenticação seguro
+### 👥 User Management
+- Admin and Resident profiles
+- Unit/fraction assignment
+- Personal data and contacts
+- Secure authentication system
 
-### 🌍 Internacionalização
-- Suporte completo Português/Inglês
-- Dados de demonstração adaptados ao idioma
-- Interface 100% traduzida
-- Detecção automática de locale
+### 🌍 Internationalization
+- Full Portuguese/English support
+- Demo data adapted to language
+- 100% translated interface
+- Automatic locale detection
 
-### 🎭 Modo Demonstração
-- Dados fictícios realistas para apresentações
-- Alternância rápida PT/EN no modo demo
-- Perfeito para campanhas promocionais
-- Simulação completa de todas as funcionalidades
+### 🎭 Demo Mode
+- Realistic mock data for presentations
+- Quick PT/EN switch in demo mode
+- Perfect for promotional campaigns
+- Complete simulation of all features
 
 ---
 
-## 🚀 Tecnologias
+## 🚀 Technologies
 
 - **Frontend:** React 19, React Router 7, Framer Motion
 - **Build Tool:** Vite 7
 - **Backend:** Supabase (PostgreSQL + Auth + Storage)
-- **Estilização:** Tailwind CSS, Glassmorphism
-- **Validação:** Zod
-- **Animações:** Framer Motion + CSS Animations
-- **Notificações:** React Toastify
-- **Validação de Formulários:** Zod + Hooks personalizados
+- **Styling:** Tailwind CSS, Glassmorphism
+- **Validation:** Zod
+- **Animations:** Framer Motion + CSS Animations
+- **Notifications:** React Toastify
+- **Form Validation:** Zod + Custom Hooks
 
 ---
 
-## 📦 Instalação
+## 📦 Installation
 
-### Pré-requisitos
+### Prerequisites
 - Node.js >= 18
-- npm ou yarn
+- npm or yarn
 
-### Passos
+### Steps
 
-1. **Clone o repositório**
+1. **Clone the repository**
 ```bash
 git clone https://github.com/Jvagarinho/kondo.git
 cd kondo
 ```
 
-2. **Instale as dependências**
+2. **Install dependencies**
 ```bash
 npm install
 ```
 
-3. **Configure as variáveis de ambiente**
+3. **Configure environment variables**
 ```bash
 cp .env.example .env
 ```
 
-Edite o ficheiro `.env` com as suas credenciais Supabase:
+Edit the `.env` file with your Supabase credentials:
 ```env
-VITE_SUPABASE_URL=sua_url_do_supabase
-VITE_SUPABASE_ANON_KEY=sua_chave_anon
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
 ```
 
-4. **Inicie o servidor de desenvolvimento**
+4. **Start the development server**
 ```bash
 npm run dev
 ```
 
-A aplicação estará disponível em `http://localhost:5173`
+The application will be available at `http://localhost:5173`
 
 ---
 
-## 🎮 Como Usar
+## 🎮 How to Use
 
-### Modo Normal
-1. Faça login com as suas credenciais
-2. Navegue pelo dashboard principal
-3. Gere comunicados, pagamentos e documentos
-4. Alterne o idioma no navbar (PT/EN)
+### Normal Mode
+1. Log in with your credentials
+2. Navigate through the main dashboard
+3. Manage notices, payments, and documents
+4. Switch language in the navbar (PT/EN)
 
-### Modo Demonstração 🎭
-1. Clique no botão "🎭 Ativar Demo" no canto inferior direito
-2. Explore todos os dados fictícios preenchidos
-3. Teste todas as funcionalidades sem necessidade de backend
-4. Alterne o idioma para ver dados em PT ou EN
-5. Clique "🛑 Sair do Demo" para voltar ao modo normal
+### Demo Mode 🎭
+1. Click the "🎭 Activate Demo" button in the bottom right corner
+2. Explore all the pre-filled mock data
+3. Test all features without needing a backend
+4. Switch language to see data in PT or EN
+5. Click "🛑 Exit Demo" to return to normal mode
 
 ---
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
 
 ```
 kondo/
 ├── public/
-│   ├── logo.svg              # Logo da aplicação
+│   ├── logo.svg              # Application logo
 │   └── vite.svg
 ├── src/
 │   ├── components/
@@ -153,101 +153,101 @@ kondo/
 │   │   ├── SignIn.jsx
 │   │   └── SignUp.jsx
 │   ├── lib/
-│   │   └── demoData.js       # Dados fictícios multilíngues
+│   │   └── demoData.js       # Multilingual mock data
 │   ├── hooks/
 │   │   ├── useValidation.js
 │   │   └── useDebounce.js
 │   ├── App.jsx
 │   └── main.jsx
 ├── migrations/
-│   └── *.sql                 # Migrações do banco de dados
+│   └── *.sql                 # Database migrations
 └── package.json
 ```
 
 ---
 
-## 🔒 Segurança
+## 🔒 Security
 
-- **Autenticação:** JWT via Supabase Auth
-- **Autorização:** Row Level Security (RLS) no PostgreSQL
-- **Upload de arquivos:** Políticas de acesso restrito a admins
-- **Variáveis de ambiente:** Nunca commitadas no repositório
-- **Validação:** Todos os inputs validados no frontend e backend
+- **Authentication:** JWT via Supabase Auth
+- **Authorization:** Row Level Security (RLS) in PostgreSQL
+- **File Upload:** Admin-only access policies
+- **Environment Variables:** Never committed to repository
+- **Validation:** All inputs validated on frontend and backend
 
 ---
 
 ## 🎨 Design System
 
-### Cores Principais
-- **Azul Principal:** `#1e3a5f` - Profissional e confiável
-- **Laranja Destaque:** `#ed8936` - Energia e modernidade
-- **Fundo:** Glassmorphism com blur e transparência
+### Primary Colors
+- **Main Blue:** `#1e3a5f` - Professional and trustworthy
+- **Accent Orange:** `#ed8936` - Energy and modernity
+- **Background:** Glassmorphism with blur and transparency
 
-### Características Visuais
-- Design Glassmorphism moderno
-- Animações suaves com Framer Motion
-- Responsivo (Mobile-first)
-- Empty States amigáveis com ilustrações SVG
-- Feedback visual em todas as interações
+### Visual Features
+- Modern Glassmorphism design
+- Smooth animations with Framer Motion
+- Responsive (Mobile-first)
+- Friendly Empty States with SVG illustrations
+- Visual feedback on all interactions
 
 ---
 
-## 🧪 Scripts Disponíveis
+## 🧪 Available Scripts
 
 ```bash
-npm run dev          # Servidor de desenvolvimento
-npm run build        # Build para produção
-npm run preview      # Preview do build
-npm run lint         # Verificação de código
+npm run dev          # Development server
+npm run build        # Production build
+npm run preview      # Build preview
+npm run lint         # Code linting
 ```
 
 ---
 
-## 📝 Funcionalidades Futuras
+## 📝 Future Features
 
-- [ ] Aplicativo móvel (PWA)
-- [ ] Notificações push
-- [ ] Relatórios financeiros avançados
-- [ ] Chat integrado entre moradores
-- [ ] Reserva de espaços comuns
-- [ ] App Android/iOS nativo
-
----
-
-## 🤝 Contribuição
-
-Contribuições são bem-vindas! Por favor:
-
-1. Faça um Fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+- [ ] Mobile app (PWA)
+- [ ] Push notifications
+- [ ] Advanced financial reports
+- [ ] Integrated chat between residents
+- [ ] Common area reservations
+- [ ] Native Android/iOS app
 
 ---
 
-## 📄 Licença
+## 🤝 Contributing
 
-Este projeto está licenciado sob a Licença MIT - veja o ficheiro [LICENSE](LICENSE) para detalhes.
+Contributions are welcome! Please:
+
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
-## 👨‍💻 Autor
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author
 
 **João Vagarinho** - [GitHub](https://github.com/Jvagarinho)
 
 ---
 
-## 🙏 Agradecimentos
+## 🙏 Acknowledgments
 
-- [React](https://react.dev/) - Biblioteca UI
-- [Vite](https://vitejs.dev/) - Build tool incrível
+- [React](https://react.dev/) - UI Library
+- [Vite](https://vitejs.dev/) - Amazing build tool
 - [Supabase](https://supabase.com/) - Backend as a Service
-- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS
-- [Framer Motion](https://www.framer.com/motion/) - Animações
+- [Tailwind CSS](https://tailwindcss.com/) - CSS Framework
+- [Framer Motion](https://www.framer.com/motion/) - Animations
 
 ---
 
 <p align="center">
-  Feito com ❤️ para simplificar a gestão de condomínios
+  Made with ❤️ to simplify condominium management
 </p>
